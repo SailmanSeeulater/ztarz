@@ -1,36 +1,64 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ztarz
 
-## Getting Started
+A daily 20-minute gym for developers: a foundations trunk every engineer needs, then role branches (frontend, backend, DevOps, AI) and stack comparisons, with spaced repetition (FSRS) so nothing fades.
 
-First, run the development server:
+Lessons link out (roadmap.sh, Full Stack Open, docs). ztarz owns the **practice**: cards, drills, labs.
+
+## Run it
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp .env.example .env
+pnpm db:up          # Postgres 18 in Docker on :5433
+pnpm db:migrate
+pnpm dev            # builds the card index, then starts Next.js on :3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+`pnpm test` runs the loader tests. `pnpm build` fails on any invalid card.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Writing cards
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+One card = one Markdown file in `content/cards/<module>/<slug>.md`. The path (minus `.md`) is the card id that review history keys on, so **renaming a file resets its history**.
 
-## Learn More
+```md
+---
+title: The interval counter that stops at 1
+module: frontend          # f1–f11, frontend, backend, devops, ai, stack
+type: what-prints         # concept | mcq | what-prints | bug-hunt | comparison | out-loud
+source: https://react.dev/...   # required: no source, no card
+tags: [react, hooks]
+---
 
-To learn more about Next.js, take a look at the following resources:
+## Prompt
+...
+## Answer
+...
+## Explanation
+...
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Required `## ` sections per type:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Type | Sections | Front-matter |
+| --- | --- | --- |
+| `concept` | Prompt, Answer | |
+| `mcq` | Prompt | `choices: [{ text, correct, why }]`, exactly one correct |
+| `what-prints` | Prompt, Answer, Explanation | |
+| `bug-hunt` | Prompt, Explanation | `choices` as above |
+| `comparison` | What it is, How it models the problem, Where it shines, Where it bites, What interviewers ask | |
+| `out-loud` | Prompt, Model answer | |
 
-## Deploy on Vercel
+Extra sections (e.g. `## Notes`) are allowed and shown after the answer.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Layout
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `content/cards/`: the cards (source of truth for content)
+- `scripts/build-content.ts`: validates cards with Zod, writes `src/generated/cards.json`
+- `src/lib/content/`: card schema, parser, loader
+- `src/db/schema.ts`: progress tables (`card_state`, `review_log`, `lab_attempt`); migrations in `drizzle/`
+- `src/app/`: Next.js App Router pages
+
+## Status
+
+Week 1 skeleton from the plan, minus auth: the library, a card page for every card type, the Postgres schema and migrations, and 7 seed cards.
+Next (week 2): Better Auth (single user), tRPC `review.record` running ts-fsrs, and the Today page.
