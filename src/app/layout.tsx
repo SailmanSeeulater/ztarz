@@ -24,6 +24,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               <Link href="/" className="hover:text-foreground">
                 Today
               </Link>
+              <Link href="/map" className="hover:text-foreground">
+                Map
+              </Link>
               <Link href="/library" className="hover:text-foreground">
                 Library
               </Link>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MODULES, allCards, cardsByModule } from "@/lib/content";
+import { MODULES, cardsByModule, publicCards } from "@/lib/content";
 import { TYPE_LABEL } from "@/components/type-label";
 
 export const metadata: Metadata = { title: "Library" };
@@ -12,7 +12,7 @@ export default function Library() {
       <section>
         <h1 className="text-2xl font-semibold tracking-tight">Card library</h1>
         <p className="mt-1 text-muted">
-          {allCards().length} cards. Practising one here doesn&apos;t change its schedule; your daily session does that.
+          {publicCards().length} cards. Practising one here doesn&apos;t change its schedule; your daily session does that.
         </p>
       </section>
 

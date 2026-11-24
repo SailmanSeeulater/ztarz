@@ -1,4 +1,5 @@
 import "server-only";
+import { randomInt } from "node:crypto";
 import { and, count, eq, gte } from "drizzle-orm";
 import { db } from "@/db";
 import { cardState, reviewLog } from "@/db/schema";
@@ -64,11 +65,38 @@ export async function getTodaySession(userId: string, now = new Date()) {
   const seen = new Set(rows.map((r) => r.cardId));
   return {
     items,
+    seed: randomInt(2 ** 31), // shuffles choices this session; server-chosen so hydration matches
     totals: { cards: allCards().length, seen: allCards().filter((c) => seen.has(c.id)).length },
   };
 }
 
 export type TodaySession = Awaited<ReturnType<typeof getTodaySession>>;
+
+/** Anki's convention: a card is mature once it's scheduled 21+ days after its last review. */
+const MATURE_MS = 21 * 86_400_000;
+
+export type ModuleProgress = { total: number; started: number; mature: number; due: number };
+
+export async function getModuleProgress(userId: string, now = new Date()) {
+  const rows = await db
+    .select({ cardId: cardState.cardId, due: cardState.due, lastReview: cardState.lastReview, state: cardState.state })
+    .from(cardState)
+    .where(eq(cardState.userId, userId));
+  const byId = new Map(rows.map((r) => [r.cardId, r]));
+  const dueBy = startOfTomorrow(now).getTime();
+
+  const progress: Record<string, ModuleProgress> = {};
+  for (const card of allCards()) {
+    const p = (progress[card.module] ??= { total: 0, started: 0, mature: 0, due: 0 });
+    p.total++;
+    const row = byId.get(card.id);
+    if (!row) continue;
+    p.started++;
+    if (row.state === "review" && row.lastReview && row.due.getTime() - row.lastReview.getTime() >= MATURE_MS) p.mature++;
+    if (row.due.getTime() < dueBy) p.due++;
+  }
+  return progress;
+}
 
 export class UnknownCardError extends Error {}
 

@@ -1,7 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import type { Card } from "@/lib/content/schema";
+import { useMemo, useState } from "react";
+import type { Card, RenderedChoice } from "@/lib/content/schema";
+
+/** Deterministic shuffle (mulberry32), so server and client render the same order. */
+function shuffle<T>(items: T[], seed: number): T[] {
+  let a = seed >>> 0;
+  const rand = () => {
+    a = (a + 0x6d2b79f5) >>> 0;
+    let t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const out = [...items];
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand() * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
 
 // Card HTML is rendered at build time from Markdown in this repo, so it's trusted.
 function Md({ html, className = "" }: { html: string; className?: string }) {
@@ -29,15 +47,30 @@ function RevealButton({ onClick, label }: { onClick: () => void; label: string }
   );
 }
 
-/** `onAnswered` fires once: with `correct` for auto-graded cards, `null` for self-rated ones. */
-export function CardView({ card, onAnswered }: { card: Card; onAnswered?: (correct: boolean | null) => void }) {
+/**
+ * `onAnswered` fires once: with `correct` for auto-graded cards, `null` for self-rated ones.
+ * `seed` shuffles the choices (sessions pass one so you can't memorize positions).
+ */
+export function CardView({
+  card,
+  onAnswered,
+  seed,
+}: {
+  card: Card;
+  onAnswered?: (correct: boolean | null) => void;
+  seed?: number;
+}) {
   const [picked, setPicked] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [guess, setGuess] = useState("");
 
+  const choices = useMemo<RenderedChoice[] | undefined>(
+    () => (card.choices && seed !== undefined ? shuffle(card.choices, seed) : card.choices),
+    [card.choices, seed],
+  );
   const prompt = card.sections.find((s) => s.key === "prompt");
   const rest = card.sections.filter((s) => s.key !== "prompt");
-  const done = card.choices ? picked !== null : revealed;
+  const done = choices ? picked !== null : revealed;
   const reveal = () => {
     setRevealed(true);
     onAnswered?.(null);
@@ -58,9 +91,9 @@ export function CardView({ card, onAnswered }: { card: Card; onAnswered?: (corre
         </div>
       )}
 
-      {card.choices && (
+      {choices && (
         <ol className="space-y-2">
-          {card.choices.map((c, i) => {
+          {choices.map((c, i) => {
             const state = picked === null ? "idle" : c.correct ? "right" : i === picked ? "wrong" : "other";
             return (
               <li key={i}>
@@ -112,13 +145,13 @@ export function CardView({ card, onAnswered }: { card: Card; onAnswered?: (corre
         />
       )}
 
-      {!card.choices && !revealed && <RevealButton onClick={reveal} label="Reveal answer" />}
+      {!choices && !revealed && <RevealButton onClick={reveal} label="Reveal answer" />}
 
       {done && (
         <div className="space-y-3">
           {picked !== null && (
-            <p className={`font-medium ${card.choices![picked].correct ? "text-good" : "text-bad"}`}>
-              {card.choices![picked].correct ? "Correct." : "Not quite."}
+            <p className={`font-medium ${choices![picked].correct ? "text-good" : "text-bad"}`}>
+              {choices![picked].correct ? "Correct." : "Not quite."}
             </p>
           )}
           {guess && (

@@ -21,7 +21,7 @@ const SLOT_LABEL: Record<Slot, string> = {
 
 const RATING_LABEL: Record<RatingName, string> = { again: "Again", hard: "Hard", good: "Good", easy: "Easy" };
 
-export function TodaySession({ items }: { items: Session["items"] }) {
+export function TodaySession({ items, seed }: { items: Session["items"]; seed: number }) {
   const trpc = useTRPC();
   const record = useMutation(trpc.review.record.mutationOptions());
 
@@ -128,6 +128,7 @@ export function TodaySession({ items }: { items: Session["items"] }) {
       <CardView
         key={turn}
         card={item.card}
+        seed={seed + turn}
         onAnswered={(correct) => setAnswer({ correct, reviewId: crypto.randomUUID() })}
       />
 
