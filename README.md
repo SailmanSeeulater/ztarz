@@ -15,7 +15,12 @@ pnpm owner:create     # creates the single account (public sign-up is off)
 pnpm dev              # builds the card index, then starts Next.js on :3000
 ```
 
-Sign in at `/sign-in`; `/` is today's session. `pnpm test` runs the unit tests. `pnpm build` fails on any invalid card.
+Sign in at `/sign-in`; `/` is today's session. `pnpm build` fails on any invalid card.
+
+## Tests
+
+- `pnpm test`: unit tests (Vitest) for the scheduler, planner and card parser.
+- `pnpm test:e2e`: Playwright signs in and completes today's session against a production build. It uses its own `ztarz_e2e` database in the dev Postgres container (created, migrated and wiped on every run) and a test-only account, so your real review history is never touched. Needs `pnpm db:up` first; run `pnpm exec playwright install chromium` once.
 
 Set `APP_TIMEZONE` (e.g. `America/New_York`) on a server whose clock isn't in your timezone; it decides when "today" starts.
 
@@ -65,6 +70,7 @@ Extra sections (e.g. `## Notes`) are allowed and shown after the answer.
 - `src/lib/srs/`: FSRS scheduling (ts-fsrs, FSRS-7), the daily planner, day boundaries. Pure and unit-tested.
 - `src/server/`: data access (`srs.ts`) and tRPC routers (`session.today`, `session.progress`, `review.record`)
 - `src/db/`: Drizzle schema (Better Auth tables + `card_state`, `review_log`, `lab_attempt`); migrations in `drizzle/`
+- `e2e/`: Playwright test, its setup, and the e2e database and server settings
 - `src/app/`: pages (`/` today, `/map`, `/library`, `/cards/...`, `/sign-in`) and the auth, tRPC and `/api/health` route handlers
 - `Dockerfile`, `compose.prod.yml`, `deploy/`: production image, nginx with Let's Encrypt; runbook in [docs/deploy.md](docs/deploy.md)
 
@@ -87,5 +93,6 @@ Docker Compose on one VPS: Postgres, the app (Next.js standalone output), nginx 
 
 ## Status
 
-Weeks 1–3 of the plan: card pipeline, library, sign-in (single owner), FSRS scheduling, the Today session, the Bask prep imported (60 cards, 67 public in all, plus a private interview deck), the curriculum map, and a production deploy setup.
-Next (week 4): 10 cards each for F1–F4, a Playwright test for "complete today's session", then daily use.
+Weeks 1–4 of the plan: card pipeline, library, sign-in (single owner), FSRS scheduling, the Today session, the Bask prep imported (60 cards plus a private interview deck), the curriculum map, a production deploy setup, 10 cards each for F1–F4, and a Playwright test that completes a session. 107 public cards.
+
+From here, per the plan: do one session every day and fix whatever annoys you. The VPS deploy itself is still to do; see [docs/deploy.md](docs/deploy.md).

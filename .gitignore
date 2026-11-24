@@ -44,3 +44,9 @@ next-env.d.ts
 
 # Personal cards: in your deck, never in git
 /content/private/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
