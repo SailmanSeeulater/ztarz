@@ -6,14 +6,15 @@
     "content": "tsx scripts/build-content.ts",
     "dev": "pnpm content && next dev",
     "build": "pnpm content && next build",
-    "start": "next start",
+    "start": "cp -R public .next/standalone/ && cp -R .next/static .next/standalone/.next/ && node .next/standalone/server.js",
     "lint": "eslint",
     "test": "vitest run",
     "db:up": "docker compose up -d db",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
-    "owner:create": "tsx --conditions=react-server scripts/create-owner.ts"
+    "owner:create": "tsx --conditions=react-server scripts/create-owner.ts",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.108.3",
@@ -35,6 +36,7 @@
     "zod": "^4.6.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@tailwindcss/turbopack": "4.3.3",
     "@types/node": "^20",
     "@types/react": "^19",
