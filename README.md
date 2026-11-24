@@ -1,5 +1,7 @@
 # ztarz
 
+[![CI](https://github.com/SailmanSeeulater/ztarz/actions/workflows/ci.yml/badge.svg)](https://github.com/SailmanSeeulater/ztarz/actions/workflows/ci.yml)
+
 A daily 20-minute gym for developers: a foundations trunk every engineer needs, then role branches (frontend, backend, DevOps, AI) and stack comparisons, with spaced repetition (FSRS) so nothing fades.
 
 Lessons link out (roadmap.sh, Full Stack Open, docs). ztarz owns the **practice**: cards, drills, labs.
@@ -21,6 +23,8 @@ Sign in at `/sign-in`; `/` is today's session. `pnpm build` fails on any invalid
 
 - `pnpm test`: unit tests (Vitest) for the scheduler, planner and card parser.
 - `pnpm test:e2e`: Playwright signs in and completes today's session against a production build. It uses its own `ztarz_e2e` database in the dev Postgres container (created, migrated and wiped on every run) and a test-only account, so your real review history is never touched. Needs `pnpm db:up` first; run `pnpm exec playwright install chromium` once.
+
+GitHub Actions ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) runs both on every push to main and every pull request: lint, unit tests and the build in one job, and the Playwright test against a Postgres service container in another. Traces from failed e2e runs are uploaded as an artifact.
 
 Set `APP_TIMEZONE` (e.g. `America/New_York`) on a server whose clock isn't in your timezone; it decides when "today" starts.
 
