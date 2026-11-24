@@ -22,7 +22,7 @@ export default function TodayPage() {
 // Reads the session and the due queue at request time, so it streams in behind Suspense.
 async function Today() {
   await getCurrentUser(); // redirects to /sign-in when signed out
-  const { items, totals } = await (await getCaller()).session.today();
+  const { items, totals, seed } = await (await getCaller()).session.today();
   const count = (slot: string) => items.filter((i) => i.slot === slot).length;
 
   return (
@@ -33,7 +33,7 @@ async function Today() {
         {totals.seen} of {totals.cards} cards started
       </p>
       <TRPCReactProvider>
-        <TodaySession items={items} />
+        <TodaySession items={items} seed={seed} />
       </TRPCReactProvider>
       <form action={signOut} className="pt-8 text-right">
         <button type="submit" className="text-sm text-muted hover:text-foreground">

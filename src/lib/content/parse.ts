@@ -47,6 +47,10 @@ export function parseCard(id: string, raw: string): Card {
     throw new CardError(id, `invalid front-matter\n  - ${issues.join("\n  - ")}`);
   }
 
+  if (fm.data.source.startsWith("notes:") && !id.startsWith("private/")) {
+    throw new CardError(id, "notes: sources are only allowed in content/private (public cards cite a URL)");
+  }
+
   const sections = splitSections(content);
   const keys = new Set(sections.map((s) => s.key));
   const dupes = sections.filter((s, i) => sections.findIndex((t) => t.key === s.key) !== i);

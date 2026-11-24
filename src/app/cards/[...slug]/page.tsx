@@ -2,16 +2,16 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { MODULES, allCards, getCard } from "@/lib/content";
+import { MODULES, getPublicCard, publicCards } from "@/lib/content";
 import { CardView } from "@/components/card-view";
 import { TYPE_LABEL } from "@/components/type-label";
 
 export function generateStaticParams() {
-  return allCards().map((c) => ({ slug: c.id.split("/") }));
+  return publicCards().map((c) => ({ slug: c.id.split("/") }));
 }
 
 export async function generateMetadata({ params }: PageProps<"/cards/[...slug]">): Promise<Metadata> {
-  const card = getCard((await params).slug.join("/"));
+  const card = getPublicCard((await params).slug.join("/"));
   return { title: card?.title };
 }
 
@@ -30,7 +30,7 @@ export default function CardPage({ params }: PageProps<"/cards/[...slug]">) {
 }
 
 async function CardBody({ params }: { params: PageProps<"/cards/[...slug]">["params"] }) {
-  const card = getCard((await params).slug.join("/"));
+  const card = getPublicCard((await params).slug.join("/"));
   if (!card) notFound();
 
   return (
@@ -47,9 +47,13 @@ async function CardBody({ params }: { params: PageProps<"/cards/[...slug]">["par
 
       <p className="border-t border-border pt-4 text-sm text-muted">
         Source:{" "}
-        <a href={card.source} className="underline hover:text-foreground" target="_blank" rel="noreferrer">
-          {new URL(card.source).hostname}
-        </a>
+        {card.source.startsWith("notes:") ? (
+          <>your notes ({card.source.slice("notes:".length)})</>
+        ) : (
+          <a href={card.source} className="underline hover:text-foreground" target="_blank" rel="noreferrer">
+            {new URL(card.source).hostname}
+          </a>
+        )}
       </p>
     </>
   );

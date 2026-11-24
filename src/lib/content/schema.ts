@@ -18,9 +18,20 @@ export const MODULES = {
   devops: "DevOps and servers",
   ai: "AI engineering",
   stack: "Stack nuance",
+  interview: "Interview answers",
 } as const;
 
 export type ModuleId = keyof typeof MODULES;
+
+export const FOUNDATIONS = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11"] as const;
+
+/** Which foundations each role branch builds on (from the plan's curriculum map). */
+export const BRANCH_PREREQS = {
+  frontend: ["f1", "f4", "f7"],
+  backend: ["f1", "f6", "f7"],
+  devops: ["f2", "f8", "f10"],
+  ai: ["f4", "f7", "f11"],
+} as const satisfies Partial<Record<ModuleId, readonly ModuleId[]>>;
 const moduleId = z.enum(Object.keys(MODULES) as [ModuleId, ...ModuleId[]]);
 
 export const CARD_TYPES = [
@@ -64,8 +75,9 @@ const choices = z
 const base = {
   title: z.string().min(1),
   module: moduleId,
-  /** Every card cites where its facts come from. Cards that can't cite don't ship. */
-  source: z.url(),
+  /** Every card cites where its facts come from. Cards that can't cite don't ship.
+   *  `notes:<file>` (your own notes) is allowed only for private cards. */
+  source: z.union([z.url(), z.string().regex(/^notes:.+/, "must be a URL or notes:<file>")]),
   tags: z.array(z.string()).default([]),
 };
 

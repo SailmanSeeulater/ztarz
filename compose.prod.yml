@@ -1,0 +1,62 @@
+# Production stack for a single VPS: Postgres, the app, nginx with Let's Encrypt.
+# Usage is in docs/deploy.md. Reads secrets from .env.production (never committed).
+
+services:
+  db:
+    image: postgres:18-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ztarz}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_DB: ${POSTGRES_DB:-ztarz}
+    volumes:
+      - pgdata:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ztarz}"]
+      interval: 5s
+      retries: 10
+    # No published port: only the app can reach the database.
+
+  app:
+    build: { context: ., target: runner }
+    restart: unless-stopped
+    env_file: .env.production
+    depends_on:
+      db: { condition: service_healthy }
+
+  # One-off commands: migrations and the owner account, e.g.
+  #   docker compose -f compose.prod.yml --env-file .env.production run --rm tools pnpm db:migrate
+  tools:
+    build: { context: ., target: tools }
+    env_file: .env.production
+    depends_on:
+      db: { condition: service_healthy }
+    profiles: [tools]
+
+  nginx:
+    image: nginx:1.29-alpine
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      DOMAIN: ${DOMAIN:?set DOMAIN in .env.production}
+    volumes:
+      - ./deploy/nginx/ztarz.conf.template:/etc/nginx/templates/default.conf.template:ro
+      - letsencrypt:/etc/letsencrypt:ro
+      - acme:/var/www/certbot:ro
+    depends_on: [app]
+    # Reload every 6h so renewed certificates are picked up.
+    command: /bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec /docker-entrypoint.sh nginx -g "daemon off;"'
+
+  certbot:
+    image: certbot/certbot:v4.1.1
+    restart: unless-stopped
+    volumes:
+      - letsencrypt:/etc/letsencrypt
+      - acme:/var/www/certbot
+    # Renew through nginx's /.well-known/acme-challenge/ every 12h (a no-op until 30 days before expiry).
+    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
+
+volumes:
+  pgdata:
+  letsencrypt:
+  acme:
