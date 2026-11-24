@@ -20,7 +20,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="font-semibold tracking-tight">
               ztarz
             </Link>
-            <span className="text-sm text-muted">dev foundations trainer</span>
+            <nav className="flex gap-4 text-sm text-muted">
+              <Link href="/" className="hover:text-foreground">
+                Today
+              </Link>
+              <Link href="/library" className="hover:text-foreground">
+                Library
+              </Link>
+            </nav>
           </div>
         </header>
         <main className="mx-auto w-full max-w-3xl flex-1 px-4 py-8">{children}</main>

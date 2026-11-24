@@ -29,7 +29,8 @@ function RevealButton({ onClick, label }: { onClick: () => void; label: string }
   );
 }
 
-export function CardView({ card }: { card: Card }) {
+/** `onAnswered` fires once: with `correct` for auto-graded cards, `null` for self-rated ones. */
+export function CardView({ card, onAnswered }: { card: Card; onAnswered?: (correct: boolean | null) => void }) {
   const [picked, setPicked] = useState<number | null>(null);
   const [revealed, setRevealed] = useState(false);
   const [guess, setGuess] = useState("");
@@ -37,6 +38,10 @@ export function CardView({ card }: { card: Card }) {
   const prompt = card.sections.find((s) => s.key === "prompt");
   const rest = card.sections.filter((s) => s.key !== "prompt");
   const done = card.choices ? picked !== null : revealed;
+  const reveal = () => {
+    setRevealed(true);
+    onAnswered?.(null);
+  };
 
   return (
     <div className="space-y-4">
@@ -62,7 +67,10 @@ export function CardView({ card }: { card: Card }) {
                 <button
                   type="button"
                   disabled={picked !== null}
-                  onClick={() => setPicked(i)}
+                  onClick={() => {
+                    setPicked(i);
+                    onAnswered?.(c.correct);
+                  }}
                   className={`w-full rounded-lg border p-3 text-left transition-colors ${
                     state === "right"
                       ? "border-good bg-good-bg"
@@ -86,7 +94,7 @@ export function CardView({ card }: { card: Card }) {
         <input
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
-          onKeyDown={(e) => e.key === "Enter" && setRevealed(true)}
+          onKeyDown={(e) => e.key === "Enter" && reveal()}
           placeholder="Your prediction"
           aria-label="Your prediction"
           className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm outline-none focus:border-accent"
@@ -104,7 +112,7 @@ export function CardView({ card }: { card: Card }) {
         />
       )}
 
-      {!card.choices && !revealed && <RevealButton onClick={() => setRevealed(true)} label="Reveal answer" />}
+      {!card.choices && !revealed && <RevealButton onClick={reveal} label="Reveal answer" />}
 
       {done && (
         <div className="space-y-3">

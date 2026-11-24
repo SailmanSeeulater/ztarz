@@ -18,7 +18,7 @@ export async function generateMetadata({ params }: PageProps<"/cards/[...slug]">
 export default function CardPage({ params }: PageProps<"/cards/[...slug]">) {
   return (
     <article className="space-y-6">
-      <Link href="/" className="inline-block text-sm text-muted hover:text-foreground">
+      <Link href="/library" className="inline-block text-sm text-muted hover:text-foreground">
         ← Library
       </Link>
       {/* Every card is prerendered; the boundary keeps unknown slugs from blocking navigation. */}

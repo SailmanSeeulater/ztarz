@@ -8,13 +8,16 @@ Lessons link out (roadmap.sh, Full Stack Open, docs). ztarz owns the **practice*
 
 ```bash
 pnpm install
-cp .env.example .env
-pnpm db:up          # Postgres 18 in Docker on :5433
+cp .env.example .env  # then fill in BETTER_AUTH_SECRET and the OWNER_* values
+pnpm db:up            # Postgres 18 in Docker on :5433
 pnpm db:migrate
-pnpm dev            # builds the card index, then starts Next.js on :3000
+pnpm owner:create     # creates the single account (public sign-up is off)
+pnpm dev              # builds the card index, then starts Next.js on :3000
 ```
 
-`pnpm test` runs the loader tests. `pnpm build` fails on any invalid card.
+Sign in at `/sign-in`; `/` is today's session. `pnpm test` runs the unit tests. `pnpm build` fails on any invalid card.
+
+Set `APP_TIMEZONE` (e.g. `America/New_York`) on a server whose clock isn't in your timezone; it decides when "today" starts.
 
 ## Writing cards
 
@@ -55,10 +58,21 @@ Extra sections (e.g. `## Notes`) are allowed and shown after the answer.
 - `content/cards/`: the cards (source of truth for content)
 - `scripts/build-content.ts`: validates cards with Zod, writes `src/generated/cards.json`
 - `src/lib/content/`: card schema, parser, loader
-- `src/db/schema.ts`: progress tables (`card_state`, `review_log`, `lab_attempt`); migrations in `drizzle/`
-- `src/app/`: Next.js App Router pages
+- `src/lib/srs/`: FSRS scheduling (ts-fsrs, FSRS-7), the daily planner, day boundaries. Pure and unit-tested.
+- `src/server/`: data access (`srs.ts`) and tRPC routers (`session.today`, `review.record`)
+- `src/db/`: Drizzle schema (Better Auth tables + `card_state`, `review_log`, `lab_attempt`); migrations in `drizzle/`
+- `src/app/`: pages (`/` today, `/library`, `/cards/...`, `/sign-in`) and the auth and tRPC route handlers
+
+## How a day is planned
+
+1. **Reviews:** every card due today, oldest first. Cards in learning steps (minutes apart) wait until their step is up.
+2. **New:** up to 5 unseen concept, multiple-choice or comparison cards a day, foundations first.
+3. **Drill:** one what-prints or bug-hunt card, once a day.
+4. **Say it out loud:** one out-loud card, once a day.
+
+A wrong auto-graded answer is always rated Again. Cards rescheduled within 30 minutes come back in the same session. `review.record` is idempotent on a client-generated `reviewId`, so a retried request never counts twice.
 
 ## Status
 
-Week 1 skeleton from the plan, minus auth: the library, a card page for every card type, the Postgres schema and migrations, and 7 seed cards.
-Next (week 2): Better Auth (single user), tRPC `review.record` running ts-fsrs, and the Today page.
+Weeks 1 and 2 of the plan: card pipeline, library, sign-in (single owner), FSRS scheduling, and the Today session.
+Next (week 3): import the Bask prep as cards, a curriculum map with progress per module, and deploy to the VPS with HTTPS.
