@@ -10,7 +10,7 @@ import { getCaller } from "@/trpc/server";
 export const metadata: Metadata = { title: "Curriculum map" };
 
 const BRANCHES = Object.keys(BRANCH_PREREQS) as (keyof typeof BRANCH_PREREQS)[];
-const ACROSS: ModuleId[] = ["stack", "interview"];
+const ACROSS: ModuleId[] = ["swe", "leetcode", "stack", "interview"];
 const EMPTY: ModuleProgress = { total: 0, started: 0, mature: 0, due: 0 };
 
 export default function MapPage() {

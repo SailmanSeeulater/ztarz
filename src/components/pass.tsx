@@ -6,8 +6,11 @@ import { StackChips } from "./stack-logo";
 const SHORT: Partial<Record<ModuleId, string>> = {
   frontend: "FE",
   backend: "BE",
+  fullstack: "FS",
   devops: "OPS",
   ai: "AI",
+  swe: "SWE",
+  leetcode: "LC",
   stack: "STK",
   interview: "INT",
 };

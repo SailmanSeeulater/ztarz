@@ -121,6 +121,17 @@ const ART: Record<ModuleId, React.ReactNode> = {
       <path d="M17 15h2M17 32h2M17 49h2M38 15h9M38 32h9M38 49h9" />
     </>
   ),
+  // Full stack: a browser window sitting on a server
+  fullstack: (
+    <>
+      <rect x="8" y="6" width="48" height="30" rx="4" />
+      <path d="M8 14h48M16 22h14M16 28h20" />
+      <path d="M32 36v6" />
+      <rect x="12" y="42" width="40" height="8" rx="2.5" />
+      <rect x="12" y="50" width="40" height="8" rx="2.5" />
+      <path d="M18 46h2M18 54h2" />
+    </>
+  ),
   // DevOps and servers: the build, ship, run loop
   devops: (
     <>
@@ -138,6 +149,26 @@ const ART: Record<ModuleId, React.ReactNode> = {
       <circle cx="32" cy="52" r="4" />
       <circle cx="54" cy="32" r="4" />
       <path d="M14 19l14-6M14 21l14 10M14 43l14-10M14 45l14 6M36 13l14 17M36 32h14M36 51l14-17" />
+    </>
+  ),
+  // Software engineering: components on a blueprint, wired by their interfaces
+  swe: (
+    <>
+      <rect x="6" y="8" width="20" height="14" rx="3" />
+      <rect x="38" y="8" width="20" height="14" rx="3" />
+      <rect x="22" y="42" width="20" height="14" rx="3" />
+      <path d="M26 15h12M16 22v10h16v10M48 22v10H32" />
+      <circle cx="32" cy="32" r="2" />
+    </>
+  ),
+  // LeetCode patterns: two pointers closing in on an array
+  leetcode: (
+    <>
+      <rect x="6" y="26" width="52" height="12" rx="3" />
+      <path d="M19 26v12M32 26v12M45 26v12" />
+      <path d="M12 48v-6M12 42l-3 3M12 42l3 3" />
+      <path d="M52 48v-6M52 42l-3 3M52 42l3 3" />
+      <path d="M12 18h40M24 12l-12 6 12 6M40 12l12 6-12 6" />
     </>
   ),
   // Stack nuance: layers of a stack
