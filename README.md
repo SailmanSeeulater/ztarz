@@ -76,7 +76,7 @@ Extra sections (e.g. `## Notes`) are allowed and shown after the answer.
 - `src/db/`: Drizzle schema (Better Auth tables + `card_state`, `review_log`, `lab_attempt`); migrations in `drizzle/`
 - `e2e/`: Playwright test, its setup, and the e2e database and server settings
 - `src/app/`: pages (`/` today, `/map`, `/library`, `/cards/...`, `/sign-in`) and the auth, tRPC and `/api/health` route handlers
-- `Dockerfile`, `compose.prod.yml`, `deploy/`: production image, nginx with Let's Encrypt; runbook in [docs/deploy.md](docs/deploy.md)
+- `Dockerfile`, `compose.prod.yml`, `deploy/`: production image (with its migrator), the VPS's compose file, nginx site, deploy and backup scripts; runbook in [docs/deploy.md](docs/deploy.md)
 
 ## How a day is planned
 
@@ -93,10 +93,10 @@ A wrong auto-graded answer is always rated Again. Cards rescheduled within 30 mi
 
 ## Deploy
 
-Docker Compose on one VPS: Postgres, the app (Next.js standalone output), nginx terminating TLS, certbot renewing. Step by step in [docs/deploy.md](docs/deploy.md).
+Live at https://ztarz.latesailor.dev. Every push to `main` that passes CI builds an image on GitHub, pushes it to GHCR, and deploys it to the VPS over SSH (migrations, restart, health check). The VPS's own nginx and certbot handle TLS. Details, secrets, rollback and backups: [docs/deploy.md](docs/deploy.md).
 
 ## Status
 
 Weeks 1–4 of the plan: card pipeline, library, sign-in (single owner), FSRS scheduling, the Today session, the Bask prep imported (60 cards plus a private interview deck), the curriculum map, a production deploy setup, 10 cards each for F1–F4, and a Playwright test that completes a session. 107 public cards.
 
-From here, per the plan: do one session every day and fix whatever annoys you. The VPS deploy itself is still to do; see [docs/deploy.md](docs/deploy.md).
+From here, per the plan: do one session every day and fix whatever annoys you. Deployed to the VPS by GitHub Actions on every push to main.
