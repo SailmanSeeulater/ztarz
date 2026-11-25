@@ -37,7 +37,7 @@ test("complete today's session", async ({ page }) => {
       await expect(verdict).toBeVisible();
       if ((await verdict.textContent()) === "Not quite.") {
         // After answering, the right choice is highlighted; its text finds it again next time.
-        const right = page.locator("ol > li > button.border-good .card-md").first();
+        const right = page.locator("ol > li > button[data-state='right'] .card-md").first();
         learned.set(name, (await right.textContent())!.trim());
         await page.getByRole("button", { name: /^Continue/ }).click();
       } else {

@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { MODULES, cardsByModule, publicCards } from "@/lib/content";
+import { cardsByModule, publicCards } from "@/lib/content";
+import { ChevronRightIcon } from "@/components/icons";
+import { ModuleBadge, hueFor, moduleParts } from "@/components/pass";
 import { TYPE_LABEL } from "@/components/type-label";
 
 export const metadata: Metadata = { title: "Library" };
@@ -8,32 +10,44 @@ export const metadata: Metadata = { title: "Library" };
 export default function Library() {
   const groups = cardsByModule();
   return (
-    <div className="space-y-10">
-      <section>
-        <h1 className="text-2xl font-semibold tracking-tight">Card library</h1>
-        <p className="mt-1 text-muted">
-          {publicCards().length} cards. Practising one here doesn&apos;t change its schedule; your daily session does that.
-        </p>
-      </section>
+    <div>
+      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Library</h1>
+      <p className="mt-1 max-w-[60ch] text-[0.9375rem] text-label-2">
+        {publicCards().length} cards. Practising one here doesn&apos;t change its schedule; your daily session does
+        that.
+      </p>
 
-      {groups.map(([moduleId, cards]) => (
-        <section key={moduleId}>
-          <h2 className="text-sm font-medium uppercase tracking-wide text-muted">{MODULES[moduleId]}</h2>
-          <ul className="mt-3 divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
-            {cards.map((card) => (
-              <li key={card.id}>
-                <Link
-                  href={`/cards/${card.id}`}
-                  className="flex items-center justify-between gap-4 px-4 py-3 hover:bg-background"
-                >
-                  <span>{card.title}</span>
-                  <span className="shrink-0 text-xs text-muted">{TYPE_LABEL[card.type]}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
+      <div className="mt-8 space-y-8">
+        {groups.map(([moduleId, cards]) => (
+          <section key={moduleId} aria-labelledby={`m-${moduleId}`}>
+            <div className="flex items-center gap-2.5 px-1">
+              <span className="pass rounded-lg" data-hue={hueFor(moduleId)}>
+                <ModuleBadge id={moduleId} />
+              </span>
+              <h2 id={`m-${moduleId}`} className="min-w-0 flex-1 truncate text-[1.0625rem] font-semibold">
+                {moduleParts(moduleId).name}
+              </h2>
+              <span className="text-[0.8125rem] text-label-2 tabular-nums">{cards.length}</span>
+            </div>
+            <ul className="mt-2.5 overflow-hidden rounded-2xl bg-group">
+              {cards.map((card) => (
+                <li key={card.id} className="group/row">
+                  <Link
+                    href={`/cards/${card.id}`}
+                    className="flex items-center gap-3 pl-4 transition-colors hover:bg-group-2 active:bg-group-2"
+                  >
+                    <span className="flex min-w-0 flex-1 items-center gap-3 border-b border-sep py-3 pr-3 group-last/row:border-b-0">
+                      <span className="min-w-0 flex-1 text-[0.9375rem]">{card.title}</span>
+                      <span className="shrink-0 text-[0.8125rem] text-label-2">{TYPE_LABEL[card.type]}</span>
+                      <ChevronRightIcon className="size-4 shrink-0 text-label-2" />
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
     </div>
   );
 }

@@ -50,3 +50,7 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Impeccable design skill, installed locally (third-party; reinstall from github.com/pbakaus/impeccable)
+/.claude/skills/impeccable/
+/.impeccable/

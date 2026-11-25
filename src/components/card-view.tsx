@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import type { Card, RenderedChoice } from "@/lib/content/schema";
+import { CheckIcon, CrossIcon } from "./icons";
 
 /** Deterministic shuffle (mulberry32), so server and client render the same order. */
 function shuffle<T>(items: T[], seed: number): T[] {
@@ -26,28 +27,21 @@ function Md({ html, className = "" }: { html: string; className?: string }) {
   return <div className={`card-md ${className}`} dangerouslySetInnerHTML={{ __html: html }} />;
 }
 
+/** A revealed section, set like the back of a pass: small label, then the content. */
 function Section({ heading, html }: { heading: string; html: string }) {
   return (
-    <section className="rounded-lg border border-border bg-surface p-4">
-      <h2 className="mb-2 text-sm font-medium text-muted">{heading}</h2>
-      <Md html={html} />
+    <section className="border-t border-[var(--well-strong)] pt-4">
+      <h3 className="field-label">{heading}</h3>
+      <Md html={html} className="mt-1.5" />
     </section>
   );
 }
 
-function RevealButton({ onClick, label }: { onClick: () => void; label: string }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-white hover:opacity-90"
-    >
-      {label}
-    </button>
-  );
-}
+const field =
+  "w-full rounded-xl bg-[var(--well)] px-3.5 py-2.5 text-[0.9375rem] text-[var(--ink)] outline-none placeholder:text-[var(--ink-2)] focus-visible:outline-2 focus-visible:outline-[var(--ink)]";
 
 /**
+ * The body of a card, drawn on its pass (inherits the pass's --ink and --well colours).
  * `onAnswered` fires once: with `correct` for auto-graded cards, `null` for self-rated ones.
  * `seed` shuffles the choices (sessions pass one so you can't memorize positions).
  */
@@ -77,13 +71,13 @@ export function CardView({
   };
 
   return (
-    <div className="space-y-4">
-      {prompt && <Md html={prompt.html} className="text-lg" />}
+    <div className="space-y-5">
+      {prompt && <Md html={prompt.html} className="text-[1.0625rem]" />}
 
       {card.type === "comparison" && !revealed && (
-        <div className="rounded-lg border border-dashed border-border p-4 text-sm text-muted">
-          Recall both sides for each field before revealing:
-          <ul className="mt-2 list-disc pl-5">
+        <div className="rounded-xl bg-[var(--well)] px-4 py-3 text-sm">
+          <p className="font-medium">Recall both sides for each, then reveal:</p>
+          <ul className="mt-2 list-disc space-y-0.5 pl-5 text-[var(--ink-2)]">
             {card.sections.map((s) => (
               <li key={s.key}>{s.heading}</li>
             ))}
@@ -100,22 +94,32 @@ export function CardView({
                 <button
                   type="button"
                   disabled={picked !== null}
+                  data-state={state}
                   onClick={() => {
                     setPicked(i);
                     onAnswered?.(c.correct);
                   }}
-                  className={`w-full rounded-lg border p-3 text-left transition-colors ${
+                  className={`flex w-full items-start gap-3 rounded-xl px-3.5 py-3 text-left transition-[background-color,color,opacity] duration-200 ${
                     state === "right"
-                      ? "border-good bg-good-bg"
+                      ? "bg-[var(--ink)] text-[var(--pass)]"
                       : state === "wrong"
-                        ? "border-bad bg-bad-bg"
+                        ? "bg-[var(--well-strong)]"
                         : state === "other"
-                          ? "border-border bg-surface opacity-70"
-                          : "border-border bg-surface hover:border-accent"
+                          ? "bg-[var(--well)] opacity-70"
+                          : "bg-[var(--well)] hover:bg-[var(--well-strong)] active:scale-[0.99]"
                   }`}
                 >
-                  <Md html={c.html} />
-                  {picked !== null && <Md html={c.whyHtml} className="mt-2 text-sm text-muted" />}
+                  <span className="min-w-0 flex-1">
+                    <Md html={c.html} />
+                    {picked !== null && (
+                      <Md
+                        html={c.whyHtml}
+                        className={`mt-1.5 text-sm ${state === "right" ? "opacity-85" : "text-[var(--ink-2)]"}`}
+                      />
+                    )}
+                  </span>
+                  {state === "right" && <CheckIcon className="mt-0.5 size-5 shrink-0" />}
+                  {state === "wrong" && <CrossIcon className="mt-0.5 size-5 shrink-0" />}
                 </button>
               </li>
             );
@@ -130,7 +134,7 @@ export function CardView({
           onKeyDown={(e) => e.key === "Enter" && reveal()}
           placeholder="Your prediction"
           aria-label="Your prediction"
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 font-mono text-sm outline-none focus:border-accent"
+          className={`${field} font-mono text-sm`}
         />
       )}
 
@@ -138,25 +142,35 @@ export function CardView({
         <textarea
           value={guess}
           onChange={(e) => setGuess(e.target.value)}
-          rows={4}
+          rows={3}
           placeholder={card.type === "out-loud" ? "Say it out loud, or type it here" : "Your answer (optional)"}
           aria-label="Your answer"
-          className="w-full rounded-md border border-border bg-surface px-3 py-2 text-sm outline-none focus:border-accent"
+          className={`${field} resize-y`}
         />
       )}
 
-      {!choices && !revealed && <RevealButton onClick={reveal} label="Reveal answer" />}
+      {!choices && !revealed && (
+        <button
+          type="button"
+          onClick={reveal}
+          className="w-full rounded-xl bg-[var(--ink)] px-4 py-3 text-[0.9375rem] font-semibold text-[var(--pass)] transition-opacity hover:opacity-90 active:scale-[0.99]"
+        >
+          Reveal answer
+        </button>
+      )}
 
       {done && (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {picked !== null && (
-            <p className={`font-medium ${choices![picked].correct ? "text-good" : "text-bad"}`}>
-              {choices![picked].correct ? "Correct." : "Not quite."}
+            <p className="flex items-center gap-2 text-[0.9375rem] font-semibold">
+              {choices![picked].correct ? <CheckIcon className="size-5" /> : <CrossIcon className="size-5" />}
+              <span>{choices![picked].correct ? "Correct." : "Not quite."}</span>
             </p>
           )}
           {guess && (
-            <p className="text-sm text-muted">
-              You said: <span className="text-foreground">{guess}</span>
+            <p className="rounded-xl bg-[var(--well)] px-3.5 py-2.5 text-sm">
+              <span className="field-label mr-2">You said</span>
+              {guess}
             </p>
           )}
           {rest.map((s) => (

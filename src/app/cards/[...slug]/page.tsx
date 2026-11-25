@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { MODULES, getPublicCard, publicCards } from "@/lib/content";
+import { getPublicCard, publicCards } from "@/lib/content";
 import { CardView } from "@/components/card-view";
+import { ArrowUpRightIcon, ChevronLeftIcon } from "@/components/icons";
+import { CardPass, Field } from "@/components/pass";
 import { TYPE_LABEL } from "@/components/type-label";
 
 export function generateStaticParams() {
@@ -17,12 +19,16 @@ export async function generateMetadata({ params }: PageProps<"/cards/[...slug]">
 
 export default function CardPage({ params }: PageProps<"/cards/[...slug]">) {
   return (
-    <article className="space-y-6">
-      <Link href="/library" className="inline-block text-sm text-muted hover:text-foreground">
-        ← Library
+    <article>
+      <Link
+        href="/library"
+        className="-ml-1.5 inline-flex items-center gap-0.5 text-[0.9375rem] text-tint hover:opacity-80"
+      >
+        <ChevronLeftIcon className="size-5" />
+        Library
       </Link>
       {/* Every card is prerendered; the boundary keeps unknown slugs from blocking navigation. */}
-      <Suspense fallback={<div className="h-40 animate-pulse rounded-lg bg-surface" />}>
+      <Suspense fallback={<div className="pass mt-4 h-72 animate-pulse opacity-60" />}>
         <CardBody params={params} />
       </Suspense>
     </article>
@@ -33,28 +39,41 @@ async function CardBody({ params }: { params: PageProps<"/cards/[...slug]">["par
   const card = getPublicCard((await params).slug.join("/"));
   if (!card) notFound();
 
+  const notes = card.source.startsWith("notes:");
   return (
-    <>
-      <div>
-        <p className="text-xs font-medium uppercase tracking-wide text-muted">
-          {MODULES[card.module]} · {TYPE_LABEL[card.type]}
-        </p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">{card.title}</h1>
-      </div>
-
+    <CardPass
+      className="mt-4"
+      module={card.module}
+      title={card.title}
+      titleAs="h1"
+      fields={
+        <>
+          <Field label="Type">{TYPE_LABEL[card.type]}</Field>
+          {card.tags.length > 0 && <Field label="Tags">{card.tags.slice(0, 3).join(", ")}</Field>}
+        </>
+      }
+      footer={
+        <dl>
+          <Field label="Source">
+            {notes ? (
+              <>your notes ({card.source.slice("notes:".length)})</>
+            ) : (
+              <a
+                href={card.source}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 underline underline-offset-2 hover:opacity-80"
+              >
+                {new URL(card.source).hostname}
+                <ArrowUpRightIcon />
+              </a>
+            )}
+          </Field>
+        </dl>
+      }
+    >
       {/* key resets answer state when navigating between cards */}
       <CardView key={card.id} card={card} />
-
-      <p className="border-t border-border pt-4 text-sm text-muted">
-        Source:{" "}
-        {card.source.startsWith("notes:") ? (
-          <>your notes ({card.source.slice("notes:".length)})</>
-        ) : (
-          <a href={card.source} className="underline hover:text-foreground" target="_blank" rel="noreferrer">
-            {new URL(card.source).hostname}
-          </a>
-        )}
-      </p>
-    </>
+    </CardPass>
   );
 }

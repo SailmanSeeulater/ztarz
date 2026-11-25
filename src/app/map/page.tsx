@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { BRANCH_PREREQS, FOUNDATIONS, MODULES, type ModuleId } from "@/lib/content/schema";
+import { Field, ModuleBadge, hueFor, moduleParts } from "@/components/pass";
+import { BRANCH_PREREQS, FOUNDATIONS, type ModuleId } from "@/lib/content/schema";
 import { getCurrentUser } from "@/lib/session";
 import type { ModuleProgress } from "@/server/srs";
 import { getCaller } from "@/trpc/server";
@@ -11,22 +12,14 @@ const BRANCHES = Object.keys(BRANCH_PREREQS) as (keyof typeof BRANCH_PREREQS)[];
 const ACROSS: ModuleId[] = ["stack", "interview"];
 const EMPTY: ModuleProgress = { total: 0, started: 0, mature: 0, due: 0 };
 
-/** "F1 · How the web works" → ["F1", "How the web works"] */
-const split = (id: ModuleId) => {
-  const [code, name] = MODULES[id].split(" · ");
-  return name ? [code, name] : [null, code];
-};
-
 export default function MapPage() {
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Curriculum map</h1>
-        <p className="mt-1 text-sm text-muted">
-          Read it bottom up: foundations feed the role branches. A card is <em>mature</em> once it&apos;s scheduled 21+
-          days out.
-        </p>
-      </div>
+    <div>
+      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Map</h1>
+      <p className="mt-1 max-w-[60ch] text-[0.9375rem] text-label-2">
+        Foundations feed the role branches. A card is mature once it&apos;s scheduled 21+ days out. Tap a pass for
+        details.
+      </p>
       <Suspense fallback={<CurriculumMap progress={{}} loading />}>
         <MapWithProgress />
       </Suspense>
@@ -48,80 +41,103 @@ function CurriculumMap({ progress, loading = false }: { progress: Record<string,
   };
 
   return (
-    <div className={`space-y-8 ${loading ? "animate-pulse" : ""}`}>
-      <Section title="Role branches" hint="Each builds on three foundations.">
+    <div className={`mt-8 space-y-10 ${loading ? "animate-pulse" : ""}`}>
+      <Stack title="Role branches" hint="Each builds on three foundations">
         {BRANCHES.map((id) => (
-          <Tile key={id} id={id} p={of(id)}>
-            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
-              needs
+          <ModulePass key={id} id={id} p={of(id)}>
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="field-label mr-1">Needs</span>
               {BRANCH_PREREQS[id].map((f) => (
-                <span key={f} className="rounded border border-border px-1.5 py-0.5 font-medium">
-                  {split(f)[0]}
+                <span key={f} className="rounded-md bg-[var(--well)] px-1.5 py-0.5 text-xs font-semibold">
+                  {moduleParts(f).code}
                 </span>
               ))}
-              <span className="ml-auto">{Math.round(readiness(BRANCH_PREREQS[id]) * 100)}% of those mature</span>
+              <span className="ml-auto text-sm tabular-nums">
+                {Math.round(readiness(BRANCH_PREREQS[id]) * 100)}% of those mature
+              </span>
             </div>
-          </Tile>
+          </ModulePass>
         ))}
-      </Section>
+      </Stack>
 
-      <Section title="Foundations" hint="Every branch assumes these.">
+      <Stack title="Foundations" hint="Every branch assumes these">
         {FOUNDATIONS.map((id) => (
-          <Tile key={id} id={id} p={of(id)} />
+          <ModulePass key={id} id={id} p={of(id)} />
         ))}
-      </Section>
+      </Stack>
 
-      <Section title="Across branches">
+      <Stack title="Across branches">
         {ACROSS.map((id) => (
-          <Tile key={id} id={id} p={of(id)} />
+          <ModulePass key={id} id={id} p={of(id)} />
         ))}
-      </Section>
+      </Stack>
     </div>
   );
 }
 
-function Section({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
+function Stack({ title, hint, children }: { title: string; hint?: string; children: React.ReactNode }) {
   return (
     <section>
-      <div className="flex items-baseline justify-between gap-4">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-muted">{title}</h2>
-        {hint && <p className="text-xs text-muted">{hint}</p>}
+      <div className="flex items-baseline justify-between gap-4 px-1">
+        <h2 className="text-[1.25rem] font-bold tracking-[-0.01em]">{title}</h2>
+        {hint && <p className="text-[0.8125rem] text-label-2">{hint}</p>}
       </div>
-      <div className="mt-3 grid gap-3 sm:grid-cols-2">{children}</div>
+      <ul className="pass-stack mt-3" style={{ "--covered": "4.25rem" } as React.CSSProperties}>
+        {children}
+      </ul>
     </section>
   );
 }
 
-function Tile({ id, p, children }: { id: ModuleId; p: ModuleProgress; children?: React.ReactNode }) {
-  const [code, name] = split(id);
+/** One module as a pass. Collapsed, the next pass covers all but its top strip; open, it shows everything. */
+function ModulePass({ id, p, children }: { id: ModuleId; p: ModuleProgress; children?: React.ReactNode }) {
+  const { name } = moduleParts(id);
   const pct = (n: number) => (p.total ? (n / p.total) * 100 : 0);
+  const empty = p.total === 0;
+
   return (
-    <div className={`rounded-lg border border-border bg-surface p-4 ${p.total === 0 ? "opacity-60" : ""}`}>
-      <div className="flex items-baseline justify-between gap-3">
-        <h3 className="font-medium">
-          {code && <span className="mr-1.5 text-muted">{code}</span>}
-          {name}
-        </h3>
-        {p.due > 0 && <span className="shrink-0 text-xs font-medium text-accent">{p.due} due</span>}
-      </div>
-      {p.total === 0 ? (
-        <p className="mt-2 text-sm text-muted">No cards yet.</p>
-      ) : (
-        <>
-          <div
-            className="mt-3 flex h-1.5 overflow-hidden rounded-full bg-border"
-            role="img"
-            aria-label={`${p.mature} mature, ${p.started} started, ${p.total} cards`}
-          >
-            <div className="bg-accent" style={{ width: `${pct(p.mature)}%` }} />
-            <div className="bg-accent/35" style={{ width: `${pct(p.started - p.mature)}%` }} />
+    <li>
+      <details className="pass" data-hue={hueFor(id)}>
+        <summary className="block rounded-[inherit]">
+          {/* The strip that stays visible in the stack */}
+          <div className="flex h-[3.75rem] items-center gap-3 px-4">
+            <ModuleBadge id={id} />
+            <span className="min-w-0 flex-1 truncate text-[0.9375rem] font-semibold">{name}</span>
+            {p.due > 0 ? (
+              <span className="shrink-0 rounded-full bg-[var(--ink)] px-2 py-0.5 text-xs font-semibold text-[var(--pass)] tabular-nums">
+                {p.due} due
+              </span>
+            ) : (
+              <span className="shrink-0 text-sm text-[var(--ink-2)] tabular-nums">
+                {empty ? "No cards yet" : `${p.mature}/${p.total}`}
+              </span>
+            )}
           </div>
-          <p className="mt-2 text-xs text-muted">
-            {p.mature} mature · {p.started} started · {p.total} cards
-          </p>
-        </>
-      )}
-      {children}
-    </div>
+          {/* Covered by the next pass, except on the last one in a stack */}
+          <div className="h-[4.25rem] px-4 pt-1">
+            <div
+              className="flex h-1.5 overflow-hidden rounded-full bg-[var(--well-strong)]"
+              role="img"
+              aria-label={`${p.mature} mature, ${p.started} started, ${p.total} cards`}
+            >
+              <div className="bg-[var(--ink)]" style={{ width: `${pct(p.mature)}%` }} />
+              <div className="bg-[var(--ink-2)] opacity-50" style={{ width: `${pct(p.started - p.mature)}%` }} />
+            </div>
+            <p className="mt-2 text-xs text-[var(--ink-2)] tabular-nums">
+              {empty ? "Nothing to practise here yet" : `${p.started} of ${p.total} started`}
+            </p>
+          </div>
+        </summary>
+        <div className="border-t border-[var(--well-strong)] px-4 pt-3.5 pb-4">
+          <dl className="grid grid-cols-4 gap-3">
+            <Field label="Cards">{p.total}</Field>
+            <Field label="Started">{p.started}</Field>
+            <Field label="Mature">{p.mature}</Field>
+            <Field label="Due">{p.due}</Field>
+          </dl>
+          {children && <div className="mt-4">{children}</div>}
+        </div>
+      </details>
+    </li>
   );
 }
