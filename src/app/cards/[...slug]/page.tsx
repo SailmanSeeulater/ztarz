@@ -45,6 +45,7 @@ async function CardBody({ params }: { params: PageProps<"/cards/[...slug]">["par
       className="mt-4"
       module={card.module}
       title={card.title}
+      stack={card.stack}
       titleAs="h1"
       fields={
         <>

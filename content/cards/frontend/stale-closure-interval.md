@@ -4,6 +4,7 @@ module: frontend
 type: what-prints
 source: https://react.dev/reference/react/useState#updating-state-based-on-the-previous-state
 tags: [react, hooks, closures, useEffect]
+stack: [react]
 ---
 
 ## Prompt

@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: https://nextjs.org/docs/app/getting-started/server-and-client-components
 tags: [nextjs, react, rsc]
+stack: [nextdotjs, react]
 ---
 
 ## Prompt

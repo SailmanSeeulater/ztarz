@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/api-reference/file-conventions/error"
 tags: ["nextjs", "errors"]
+stack: ["nextdotjs"]
 choices:
   - text: "An API route"
     why: "It's a UI file convention."

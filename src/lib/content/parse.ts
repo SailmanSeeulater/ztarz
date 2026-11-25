@@ -1,6 +1,15 @@
 import matter from "gray-matter";
 import { Marked } from "marked";
-import { REQUIRED_SECTIONS, frontMatterSchema, type Card } from "./schema";
+import {
+  LAB_SECTIONS,
+  REQUIRED_SECTIONS,
+  frontMatterSchema,
+  labFrontMatterSchema,
+  type Card,
+  type Lab,
+  type StackLogo,
+} from "./schema";
+import { resolveStack } from "./stack";
 
 const md = new Marked({ gfm: true });
 const render = (s: string) => md.parse(s.trim(), { async: false });
@@ -62,6 +71,14 @@ export function parseCard(id: string, raw: string): Card {
   const empty = sections.filter((s) => !s.markdown);
   if (empty.length) throw new CardError(id, `empty sections: ${empty.map((s) => s.heading).join(", ")}`);
 
+  const unknown = fm.data.stack.filter((slug) => !resolveStack(slug));
+  if (unknown.length) {
+    throw new CardError(
+      id,
+      `unknown stack: ${unknown.join(", ")} (use a Simple Icons slug from https://simpleicons.org, or add it to LETTERED in stack.ts)`,
+    );
+  }
+
   const { title, module, type, source, tags } = fm.data;
   return {
     id,
@@ -70,6 +87,7 @@ export function parseCard(id: string, raw: string): Card {
     type,
     source,
     tags,
+    stack: fm.data.stack.map((slug) => resolveStack(slug) as StackLogo),
     sections: sections.map((s) => ({ key: s.key, heading: s.heading, html: render(s.markdown) })),
     ...("choices" in fm.data && {
       choices: fm.data.choices.map((c) => ({
@@ -78,5 +96,40 @@ export function parseCard(id: string, raw: string): Card {
         whyHtml: renderInline(c.why),
       })),
     }),
+  };
+}
+
+/** Parse one lab file. Throws CardError (the id names the lab) with every problem found. */
+export function parseLab(id: string, raw: string): Lab {
+  const { data, content } = matter(raw);
+  const fm = labFrontMatterSchema.safeParse(data);
+  if (!fm.success) {
+    const issues = fm.error.issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`);
+    throw new CardError(id, `invalid front-matter\n  - ${issues.join("\n  - ")}`);
+  }
+  for (const c of fm.data.checks) {
+    try {
+      new RegExp(c.pattern, "im");
+    } catch (e) {
+      throw new CardError(id, `check "${c.label}" has an invalid pattern: ${String(e)}`);
+    }
+  }
+  const unknown = fm.data.stack.filter((slug) => !resolveStack(slug));
+  if (unknown.length) throw new CardError(id, `unknown stack: ${unknown.join(", ")}`);
+
+  const sections = splitSections(content);
+  const missing = LAB_SECTIONS.filter((k) => !sections.some((s) => s.key === k));
+  if (missing.length) throw new CardError(id, `missing sections: ${missing.map((k) => `## ${k}`).join(", ")}`);
+
+  const { title, module, minutes, source, checks } = fm.data;
+  return {
+    id,
+    title,
+    module,
+    minutes,
+    source,
+    checks,
+    stack: fm.data.stack.map((slug) => resolveStack(slug) as StackLogo),
+    sections: sections.map((s) => ({ key: s.key, heading: s.heading, html: render(s.markdown) })),
   };
 }

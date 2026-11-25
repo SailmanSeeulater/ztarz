@@ -1,6 +1,22 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "ztarz-dev", "runtimeExecutable": "pnpm", "runtimeArgs": ["dev"], "port": 3000 }
+    {
+      "name": "ztarz-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "ztarz-e2e",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": [
+        "dev:e2e"
+      ],
+      "port": 3200,
+      "url": "http://127.0.0.1:3200"
+    }
   ]
 }

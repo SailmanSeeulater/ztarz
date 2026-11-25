@@ -4,6 +4,7 @@ module: f2
 type: mcq
 source: "https://man7.org/linux/man-pages/man1/bash.1.html#COMMAND_EXECUTION"
 tags: ["shell", "path"]
+stack: ["gnubash"]
 choices:
   - text: "The file isn't executable"
     why: "Then running it by its full path would fail too."

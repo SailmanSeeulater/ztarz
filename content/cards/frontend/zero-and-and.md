@@ -4,6 +4,7 @@ module: frontend
 type: what-prints
 source: "https://react.dev/learn/conditional-rendering"
 tags: ["react", "jsx", "conditional-rendering"]
+stack: ["react"]
 ---
 
 ## Prompt

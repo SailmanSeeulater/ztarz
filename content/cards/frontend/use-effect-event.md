@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react/useEffectEvent"
 tags: ["react", "useEffect", "closures"]
+stack: ["react"]
 choices:
   - text: "Reading the latest props or state inside an effect without adding them to its dependencies"
     correct: true

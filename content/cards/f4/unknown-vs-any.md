@@ -4,6 +4,7 @@ module: f4
 type: mcq
 source: "https://www.typescriptlang.org/docs/handbook/2/functions.html#unknown"
 tags: ["typescript"]
+stack: ["typescript"]
 choices:
   - text: "`any` is safer"
     why: "`any` silently disables type checking."

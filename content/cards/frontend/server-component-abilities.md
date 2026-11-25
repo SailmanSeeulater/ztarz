@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/server-and-client-components"
 tags: ["nextjs", "rsc"]
+stack: ["nextdotjs", "react"]
 choices:
   - text: "Read `localStorage`"
     why: "There's no browser on the server."

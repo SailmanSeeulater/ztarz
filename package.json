@@ -14,7 +14,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:studio": "drizzle-kit studio",
     "owner:create": "tsx --conditions=react-server scripts/create-owner.ts",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "dev:e2e": "pnpm content && tsx e2e/dev.ts"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.108.3",
@@ -45,6 +46,7 @@
     "drizzle-kit": "^0.31.11",
     "eslint": "^9",
     "eslint-config-next": "16.4.6",
+    "simple-icons": "16.37.0",
     "tailwindcss": "4.3.3",
     "tsx": "^4.23.15",
     "typescript": "^5",

@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/api-reference/file-conventions/loading"
 tags: ["nextjs", "suspense"]
+stack: ["nextdotjs"]
 choices:
   - text: "Preloads images"
     why: "Images aren't involved."

@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://testing-library.com/docs/react-testing-library/example-intro"
 tags: ["testing", "react"]
+stack: ["react"]
 ---
 
 ## Prompt

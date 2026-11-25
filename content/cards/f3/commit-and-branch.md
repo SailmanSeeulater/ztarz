@@ -4,6 +4,7 @@ module: f3
 type: concept
 source: "https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell"
 tags: ["git"]
+stack: ["git"]
 ---
 
 ## Prompt

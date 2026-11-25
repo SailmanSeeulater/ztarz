@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/you-might-not-need-an-effect"
 tags: ["react", "derived-state"]
+stack: ["react"]
 choices:
   - text: "Its own `useState`, synced in `useEffect`"
     why: "Extra renders, and it can show stale results."

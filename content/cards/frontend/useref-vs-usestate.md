@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react/useRef"
 tags: ["react", "hooks"]
+stack: ["react"]
 choices:
   - text: "Refs can't hold objects"
     why: "A ref's `.current` can hold any value."

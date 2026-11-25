@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://react-hook-form.com/get-started#SchemaValidation"
 tags: ["react", "forms", "zod"]
+stack: ["react", "zod"]
 ---
 
 ## Prompt

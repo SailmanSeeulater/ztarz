@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react/useContext"
 tags: ["react", "context", "performance"]
+stack: ["react"]
 choices:
   - text: "Context disables memoization"
     why: "Memoized children still re-render only if they read the context."

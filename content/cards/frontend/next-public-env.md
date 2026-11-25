@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/guides/environment-variables"
 tags: ["nextjs", "config", "security"]
+stack: ["nextdotjs"]
 choices:
   - text: "Only variables prefixed `NEXT_PUBLIC_` reach the browser"
     correct: true

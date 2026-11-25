@@ -4,6 +4,7 @@ module: f4
 type: what-prints
 source: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Execution_model"
 tags: ["javascript", "event-loop"]
+stack: ["javascript"]
 ---
 
 ## Prompt

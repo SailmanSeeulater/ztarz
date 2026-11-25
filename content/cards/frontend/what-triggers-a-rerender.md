@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/render-and-commit"
 tags: ["react", "rendering"]
+stack: ["react"]
 choices:
   - text: "Any local variable inside it changes"
     why: "Plain variables aren't tracked; changing one does nothing until something else triggers a render."

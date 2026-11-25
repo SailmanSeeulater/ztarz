@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Suspense } from "react";
+import { ChevronRightIcon } from "@/components/icons";
 import { TodaySession } from "@/components/today-session";
 import { getCurrentUser } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -10,7 +12,13 @@ export const metadata: Metadata = { title: "Today" };
 export default function TodayPage() {
   return (
     <div>
-      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Today</h1>
+      <div className="flex items-baseline justify-between gap-4">
+        <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Today</h1>
+        <Link href="/week" className="inline-flex items-center text-[0.9375rem] text-tint hover:opacity-80">
+          This week
+          <ChevronRightIcon className="size-4" />
+        </Link>
+      </div>
       <Suspense fallback={<TodaySkeleton />}>
         <Today />
       </Suspense>

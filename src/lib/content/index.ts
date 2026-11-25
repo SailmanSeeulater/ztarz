@@ -1,5 +1,6 @@
 import cardsJson from "@/generated/cards.json";
-import { MODULES, type Card, type ModuleId } from "./schema";
+import labsJson from "@/generated/labs.json";
+import { MODULES, type Card, type Lab, type ModuleId } from "./schema";
 
 // Built by `pnpm content` from content/cards/**.md and (gitignored) content/private/**.md.
 const cards = cardsJson as Card[];
@@ -24,5 +25,11 @@ export function cardsByModule() {
   return [...groups].filter(([, cs]) => cs.length > 0);
 }
 
+// Labs are all public: content/labs/*.md.
+const labs = labsJson as Lab[];
+const labById = new Map(labs.map((l) => [l.id, l]));
+export const allLabs = () => labs;
+export const getLab = (id: string) => labById.get(id);
+
 export { MODULES };
-export type { Card, ModuleId };
+export type { Card, Lab, ModuleId };

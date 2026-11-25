@@ -6,8 +6,8 @@
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { CardError, parseCard } from "../src/lib/content/parse";
-import type { Card } from "../src/lib/content/schema";
+import { CardError, parseCard, parseLab } from "../src/lib/content/parse";
+import type { Card, Lab } from "../src/lib/content/schema";
 
 const root = join(import.meta.dirname, "..");
 const outFile = join(root, "src", "generated", "cards.json");
@@ -37,6 +37,20 @@ for (const { path, id } of files) {
   }
 }
 
+// Labs: content/labs/*.md, all public.
+const labsDir = join(root, "content", "labs");
+const labs: Lab[] = [];
+if (existsSync(labsDir)) {
+  for (const f of readdirSync(labsDir).filter((f) => f.endsWith(".md")).sort()) {
+    const id = f.replace(/\.md$/, "");
+    try {
+      labs.push(parseLab(id, readFileSync(join(labsDir, f), "utf8")));
+    } catch (e) {
+      errors.push(e instanceof CardError ? e.message : `lab ${id}: ${String(e)}`);
+    }
+  }
+}
+
 if (errors.length) {
   console.error(`✗ ${errors.length} invalid card(s):\n\n${errors.join("\n\n")}`);
   process.exit(1);
@@ -44,5 +58,6 @@ if (errors.length) {
 
 mkdirSync(join(root, "src", "generated"), { recursive: true });
 writeFileSync(outFile, JSON.stringify(cards, null, 2) + "\n");
+writeFileSync(join(root, "src", "generated", "labs.json"), JSON.stringify(labs, null, 2) + "\n");
 const priv = cards.filter((c) => c.id.startsWith("private/")).length;
-console.log(`✓ ${cards.length} cards (${priv} private) → ${relative(root, outFile)}`);
+console.log(`✓ ${cards.length} cards (${priv} private), ${labs.length} labs → ${relative(root, outFile)}`);

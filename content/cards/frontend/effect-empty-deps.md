@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react/useEffect"
 tags: ["react", "useEffect"]
+stack: ["react"]
 choices:
   - text: "Before every render"
     why: "Effects never run before rendering; they run after React commits to the screen."

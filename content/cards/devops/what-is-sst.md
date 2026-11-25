@@ -4,6 +4,7 @@ module: devops
 type: mcq
 source: "https://sst.dev/docs/"
 tags: ["sst", "aws", "iac"]
+stack: ["sst", "aws"]
 choices:
   - text: "A testing library"
     why: "Not a test tool."

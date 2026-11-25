@@ -4,6 +4,7 @@ module: frontend
 type: bug-hunt
 source: "https://react.dev/learn/synchronizing-with-effects"
 tags: ["react", "useEffect", "closures"]
+stack: ["react"]
 choices:
   - text: "Only the missing cleanup"
     why: "Cleanup alone still leaves an effect that re-runs every render."

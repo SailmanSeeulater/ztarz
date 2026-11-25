@@ -14,6 +14,7 @@ import {
   type RatingName,
 } from "@/lib/srs/scheduler";
 import { planToday } from "@/lib/srs/today";
+import { buildWeeklyReport } from "@/lib/report";
 
 /** A card answered again within this window comes back in the same session. */
 const REQUEUE_WITHIN_MS = 30 * 60_000;
@@ -96,6 +97,20 @@ export async function getModuleProgress(userId: string, now = new Date()) {
     if (row.due.getTime() < dueBy) p.due++;
   }
   return progress;
+}
+
+/** The last seven days of reviews plus every card's next due date, summarised. */
+export async function getWeeklyReport(userId: string, now = new Date()) {
+  // Eight days back covers the report's seven local days in any timezone.
+  const since = new Date(startOfDay(now).getTime() - 8 * 86_400_000);
+  const [reviews, due] = await Promise.all([
+    db
+      .select({ cardId: reviewLog.cardId, rating: reviewLog.rating, reviewedAt: reviewLog.reviewedAt })
+      .from(reviewLog)
+      .where(and(eq(reviewLog.userId, userId), gte(reviewLog.reviewedAt, since))),
+    db.select({ cardId: cardState.cardId, due: cardState.due }).from(cardState).where(eq(cardState.userId, userId)),
+  ]);
+  return buildWeeklyReport({ cards: allCards(), reviews, due, now });
 }
 
 export class UnknownCardError extends Error {}

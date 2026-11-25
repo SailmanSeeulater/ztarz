@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/guides/data-security"
 tags: ["nextjs", "security", "server-actions"]
+stack: ["nextdotjs"]
 choices:
   - text: "Only in production"
     why: "They behave the same in every environment."

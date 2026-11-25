@@ -4,6 +4,7 @@ module: f3
 type: concept
 source: "https://git-scm.com/docs/git-reflog"
 tags: ["git", "recovery"]
+stack: ["git"]
 ---
 
 ## Prompt

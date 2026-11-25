@@ -4,6 +4,7 @@ module: f4
 type: bug-hunt
 source: "https://typescript-eslint.io/rules/return-await/"
 tags: ["typescript", "async", "errors"]
+stack: ["javascript", "typescript"]
 choices:
   - text: "Async functions can't use try/catch"
     why: "They can: `await` inside `try` is exactly how you catch async errors."

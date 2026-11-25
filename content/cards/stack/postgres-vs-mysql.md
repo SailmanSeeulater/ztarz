@@ -4,6 +4,7 @@ module: stack
 type: comparison
 source: https://dev.mysql.com/doc/refman/8.4/en/innodb-index-types.html
 tags: [databases, sql, f6]
+stack: [postgresql, mysql]
 ---
 
 ## What it is

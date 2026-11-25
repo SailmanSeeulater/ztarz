@@ -4,6 +4,7 @@ module: f4
 type: what-prints
 source: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Closures"
 tags: ["javascript", "closures", "scope"]
+stack: ["javascript"]
 ---
 
 ## Prompt

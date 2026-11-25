@@ -4,6 +4,7 @@ module: devops
 type: mcq
 source: "https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/rds-proxy.html"
 tags: ["serverless", "postgres", "aws"]
+stack: ["postgresql", "aws"]
 choices:
   - text: "Connection exhaustion, because every function instance opens its own connection"
     correct: true

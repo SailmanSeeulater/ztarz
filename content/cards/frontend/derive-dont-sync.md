@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/you-might-not-need-an-effect"
 tags: ["react", "derived-state"]
+stack: ["react"]
 choices:
   - text: "`useMemo` is required"
     why: "`useMemo` is only worth it for expensive work; string concatenation isn't."

@@ -4,6 +4,7 @@ module: stack
 type: mcq
 source: "https://orm.drizzle.team/docs/overview"
 tags: ["drizzle", "orm"]
+stack: ["drizzle"]
 choices:
   - text: "It only supports MongoDB"
     why: "Drizzle targets SQL databases: Postgres, MySQL, SQLite and others."

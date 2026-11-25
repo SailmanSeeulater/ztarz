@@ -4,6 +4,7 @@ module: backend
 type: out-loud
 source: "https://docs.stripe.com/webhooks"
 tags: ["stripe", "webhooks", "idempotency"]
+stack: ["stripe"]
 ---
 
 ## Prompt

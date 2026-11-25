@@ -4,6 +4,7 @@ module: frontend
 type: bug-hunt
 source: "https://react.dev/learn/updating-arrays-in-state"
 tags: ["react", "state", "immutability"]
+stack: ["react"]
 choices:
   - text: "Arrays can't be state"
     why: "Any value can be state, as long as you replace it instead of mutating it."

@@ -9,6 +9,7 @@ const card = (id: string, type: CardType, module: ModuleId = "frontend"): Card =
   type,
   source: "https://example.com",
   tags: [],
+  stack: [],
   sections: [],
 });
 const now = new Date("2026-11-23T10:00:00Z");
