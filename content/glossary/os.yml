@@ -1,0 +1,160 @@
+terms:
+  - term: Operating system
+    aka: OS
+    short: The software that manages a computer's hardware and gives programs a common set of services, such as files, memory, processes and networking. Linux, macOS and Windows are operating systems.
+    source: https://en.wikipedia.org/wiki/Operating_system
+    stack: []
+    see: [Kernel, Process]
+
+  - term: Kernel
+    short: The core of the operating system. It runs with full hardware access and handles memory, scheduling, devices and system calls for every program.
+    detail: |
+      Programs run in user space and ask the kernel for things through system calls like `read`, `write` and `fork`. A bug in the kernel can crash the whole machine; a bug in a program usually only crashes that program.
+    source: https://en.wikipedia.org/wiki/Kernel_(operating_system)
+    stack: []
+    see: [Operating system, Linux, Process]
+
+  - term: Process
+    short: A running program, with its own memory, open files and process ID (PID). Two copies of the same program are two processes that cannot see each other's memory.
+    detail: |
+      On Unix a process is created with `fork` and usually replaced by a new program with `exec`. `ps` and `top` list them; `kill PID` sends one a signal.
+    source: https://en.wikipedia.org/wiki/Process_(computing)
+    stack: []
+    see: [Thread, Signal, Daemon]
+
+  - term: Thread
+    short: A path of execution inside a process. Threads in one process share its memory, so they can cooperate cheaply but can also corrupt each other's data without locks.
+    source: https://en.wikipedia.org/wiki/Thread_(computing)
+    stack: []
+    see: [Process]
+
+  - term: Unix
+    short: The operating system written at Bell Labs from 1969 by Ken Thompson and Dennis Ritchie. Its ideas (small tools, pipes, everything is a file) shaped Linux, macOS and modern shells.
+    fun: The name began as "Unics", a pun on Multics, the large system Bell Labs had just left. Nobody remembers who settled on the spelling UNIX.
+    source: https://en.wikipedia.org/wiki/Unix
+    stack: []
+    see: [Linux, POSIX, Shell]
+
+  - term: Linux
+    short: A free, open-source, Unix-like kernel. Combined with tools and a package manager it forms a distribution such as Ubuntu, Debian or Fedora, and it runs most servers and containers.
+    fun: Linus Torvalds first released the kernel on 17 September 1991.
+    source: https://en.wikipedia.org/wiki/Linux
+    stack: [linux]
+    see: [Kernel, Unix, POSIX]
+
+  - term: POSIX
+    aka: Portable Operating System Interface
+    short: An IEEE standard for how a Unix-like system should behave, covering system calls, the shell and core utilities. Code written to POSIX runs on Linux, macOS and the BSDs with few changes.
+    detail: |
+      A `#!/bin/sh` script that sticks to POSIX features works anywhere; one that uses Bash extensions needs `#!/usr/bin/env bash`.
+    fun: Richard Stallman suggested the name POSIX to the IEEE, replacing the earlier "IEEE-IX".
+    source: https://en.wikipedia.org/wiki/POSIX
+    stack: []
+    see: [Unix, Shell]
+
+  - term: Shell
+    short: The program that reads the commands you type and runs them, such as Bash, Zsh or sh. It also handles pipes, redirects, variables and scripts.
+    detail: |
+      The shell is not the terminal: the terminal draws text, the shell interprets it. `cmd > out.txt 2>&1` and `cmd1 | cmd2` are shell features, not features of the commands.
+    source: https://en.wikipedia.org/wiki/Unix_shell
+    stack: [gnubash]
+    see: [Terminal, Environment variable, PATH]
+
+  - term: Terminal
+    aka: TTY, terminal emulator
+    short: The window that shows text output and sends your keystrokes to a shell or program. It handles display; the shell inside it does the work.
+    fun: Unix calls terminal devices `tty`, short for teletypewriter, the printing keyboards early Unix machines were used from.
+    source: https://en.wikipedia.org/wiki/Tty_(Unix)
+    stack: []
+    see: [Shell, Standard streams]
+
+  - term: File descriptor
+    short: A small integer a process uses to refer to an open file, socket or pipe. 0 is standard input, 1 standard output, 2 standard error.
+    detail: |
+      "Too many open files" means the process hit its descriptor limit, often from sockets or files never closed. `2>&1` means "point descriptor 2 where 1 goes".
+    source: https://en.wikipedia.org/wiki/File_descriptor
+    stack: []
+    see: [Standard streams, Process]
+
+  - term: Standard streams
+    aka: stdin, stdout, stderr
+    short: The three channels every process starts with. Input arrives on stdin, normal output goes to stdout and errors go to stderr, so you can redirect them separately.
+    detail: |
+      `cmd > out.log 2> err.log` splits them. Logging errors to stderr keeps them out of piped data.
+    source: https://en.wikipedia.org/wiki/Standard_streams
+    stack: []
+    see: [File descriptor, Shell]
+
+  - term: Signal
+    short: A small notification the OS delivers to a process, such as SIGINT (Ctrl+C), SIGTERM (please stop) or SIGKILL (stop now). Most can be caught to clean up first.
+    detail: |
+      `kill PID` sends SIGTERM by default; `kill -9 PID` sends SIGKILL. Servers should handle SIGTERM by finishing in-flight work, because that is what Docker and systemd send on shutdown.
+    fun: SIGKILL and SIGSTOP are special. A process cannot catch, block or ignore them.
+    source: https://man7.org/linux/man-pages/man7/signal.7.html
+    stack: [linux]
+    see: [Process, Daemon, Container]
+
+  - term: Environment variable
+    short: A named string passed to a process by whoever started it, such as `HOME`, `PATH` or `DATABASE_URL`. Programs read them for configuration that differs between machines.
+    detail: |
+      Child processes inherit a copy; changing one in a child never changes the parent. In a shell, `export NAME=value` makes a variable visible to programs you run.
+    source: https://en.wikipedia.org/wiki/Environment_variable
+    stack: []
+    see: [PATH, Shell, Process]
+
+  - term: PATH
+    short: The environment variable listing the directories the shell searches, in order, when you type a command name. "command not found" usually means the program's directory is not in it.
+    detail: |
+      `echo $PATH` shows it; `which node` shows which copy wins. Earlier entries take priority, which is how version managers slip their own `node` in front of the system one.
+    source: https://en.wikipedia.org/wiki/PATH_(variable)
+    stack: []
+    see: [Environment variable, Shell]
+
+  - term: Superuser
+    aka: root
+    short: The account with unlimited power over the system, called `root` on Unix. It can read any file, kill any process and change any setting.
+    detail: |
+      Run day-to-day work and services as ordinary users, and become root only for the one command that needs it.
+    source: https://en.wikipedia.org/wiki/Superuser
+    stack: []
+    see: [sudo, Principle of least privilege]
+
+  - term: sudo
+    short: A command that runs one other command as another user, by default root, after checking that you are allowed, as in `sudo apt install nginx`.
+    detail: |
+      Who may run what is set in `/etc/sudoers` (edit it with `visudo`). Every use can be logged, which makes it safer than sharing the root password.
+    fun: It originally stood for "superuser do". It was first written around 1980 at SUNY Buffalo.
+    source: https://en.wikipedia.org/wiki/Sudo
+    stack: [linux]
+    see: [Superuser, Principle of least privilege]
+
+  - term: Daemon
+    short: A program that runs in the background with no terminal, waiting to do work, such as a web server or `sshd`. The trailing "d" in many program names marks one.
+    fun: An MIT Project MAC team coined the term around 1963, inspired by Maxwell's demon, an imaginary helper from physics that sorts molecules in the background.
+    source: https://en.wikipedia.org/wiki/Daemon_(computing)
+    stack: []
+    see: [Process, systemd, Signal]
+
+  - term: systemd
+    short: The init system and service manager on most Linux distributions. It starts services at boot, restarts them if they crash and collects their logs.
+    detail: |
+      `systemctl status nginx`, `systemctl restart nginx` and `journalctl -u nginx -f` cover most daily use. Services are described in unit files.
+    fun: Its authors insist it is written `systemd`, all lower case, because it is a system daemon and Unix daemons get a lower-case d.
+    source: https://en.wikipedia.org/wiki/Systemd
+    stack: [systemd, linux]
+    see: [Daemon, Linux]
+
+  - term: Virtual memory
+    short: The OS gives each process its own private address space and maps it onto physical RAM behind the scenes. Processes cannot see each other's memory, and the total can exceed the RAM installed.
+    source: https://en.wikipedia.org/wiki/Virtual_memory
+    stack: []
+    see: [Swap, Process, Kernel]
+
+  - term: Swap
+    aka: Paging to disk
+    short: Disk space the OS uses as overflow when RAM is full, moving rarely used memory pages out to make room. It prevents crashes but is far slower than RAM.
+    detail: |
+      A server that swaps heavily feels frozen. Linux's out-of-memory killer ends a process when even swap cannot help.
+    source: https://en.wikipedia.org/wiki/Memory_paging
+    stack: [linux]
+    see: [Virtual memory]

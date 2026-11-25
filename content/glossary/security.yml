@@ -1,0 +1,165 @@
+terms:
+  - term: Authentication
+    aka: AuthN
+    short: Proving who you are, for example with a password, a passkey or a code from your phone. It answers "who is this?".
+    detail: |
+      Return the same error for "no such user" and "wrong password" so attackers cannot use the login form to discover accounts.
+    source: https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html
+    stack: [owasp]
+    see: [Authorisation, MFA, Session]
+
+  - term: Authorisation
+    aka: Authorization, AuthZ
+    short: Deciding what an authenticated user is allowed to do. It answers "may this person do this?", and it must be checked on the server for every request.
+    detail: |
+      The classic bug is checking that a user is logged in but not that the record belongs to them, so changing `/orders/41` to `/orders/42` shows someone else's order.
+    source: https://cheatsheetseries.owasp.org/cheatsheets/Authorization_Cheat_Sheet.html
+    stack: [owasp]
+    see: [Authentication, Principle of least privilege]
+
+  - term: Cryptographic hash
+    short: A one-way function that turns any input into a fixed-size fingerprint, such as SHA-256. The same input always gives the same output, and you cannot get the input back.
+    detail: |
+      Hashing is not encryption: there is no key and no way to reverse it. Use it to check integrity or compare values. For passwords use a deliberately slow hash such as Argon2 or bcrypt, never plain SHA-256.
+    source: https://en.wikipedia.org/wiki/Cryptographic_hash_function
+    stack: []
+    see: [Salt, Encryption]
+
+  - term: Encryption
+    short: Scrambling data with a key so only someone with the right key can turn it back into the original. Unlike hashing, it is designed to be reversed.
+    detail: |
+      Symmetric encryption (AES) uses one shared key; asymmetric encryption uses a public and private key pair. "In transit" means over the network (TLS); "at rest" means on disk.
+    source: https://en.wikipedia.org/wiki/Encryption
+    stack: []
+    see: [Cryptographic hash, Public-key cryptography, TLS]
+
+  - term: Salt
+    short: A random value added to each password before hashing, stored alongside the hash. Two users with the same password then get different hashes.
+    detail: |
+      Salts defeat precomputed lookup tables and stop one cracked hash revealing every account with that password. Modern password hashes like bcrypt and Argon2 generate and store the salt for you.
+    source: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+    stack: [owasp]
+    see: [Cryptographic hash]
+
+  - term: OAuth
+    aka: OAuth 2.0
+    short: A standard that lets a user give one app limited access to their data in another service without sharing their password, as in "Allow this app to read your calendar".
+    detail: |
+      The app receives an access token with specific scopes. OAuth is about authorisation; logging people in ("Sign in with Google") uses OpenID Connect, a layer on top.
+    source: https://oauth.net/2/
+    stack: [oauth]
+    see: [JWT, Authorisation, Authentication]
+
+  - term: JWT
+    aka: JSON Web Token
+    short: A compact, signed token made of three base64url parts (header, claims, signature) separated by dots. The server can verify the signature without a database lookup.
+    detail: |
+      Signed is not encrypted: anyone can read the claims, so never put secrets in them. A JWT cannot be revoked before it expires unless you add a denylist, so keep lifetimes short.
+    fun: The standard suggests pronouncing JWT like the English word "jot".
+    source: https://www.rfc-editor.org/rfc/rfc7519
+    stack: [jwt]
+    see: [OAuth, Session]
+
+  - term: Session
+    short: The server's memory of a logged-in user across requests. After login the server stores a session and gives the browser a random session ID, usually in a cookie.
+    detail: |
+      Issue a fresh session ID at login to prevent session fixation, expire idle sessions, and delete the session on logout.
+    source: https://cheatsheetseries.owasp.org/cheatsheets/Session_Management_Cheat_Sheet.html
+    stack: [owasp]
+    see: [Cookie, JWT, Authentication]
+
+  - term: MFA
+    aka: Multi-factor authentication, 2FA
+    short: Logging in with two or more different kinds of proof, such as a password plus a code from an app or a hardware key. A stolen password alone is then not enough.
+    detail: |
+      The factors are something you know, something you have and something you are. Authenticator apps and passkeys are stronger than SMS codes.
+    source: https://cheatsheetseries.owasp.org/cheatsheets/Multifactor_Authentication_Cheat_Sheet.html
+    stack: [owasp]
+    see: [Authentication, Phishing]
+
+  - term: XSS
+    aka: Cross-site scripting
+    short: An attack where a site ends up running an attacker's JavaScript in other users' browsers, usually because user input was put into a page without escaping.
+    detail: |
+      The script runs as your site, so it can read the page and make requests as the victim. Defend by escaping output for its context (frameworks like React do this by default), avoiding raw-HTML APIs and adding a Content Security Policy.
+    source: https://owasp.org/www-community/attacks/xss/
+    stack: [owasp]
+    see: [CSRF, Same-origin policy, Cookie]
+
+  - term: CSRF
+    aka: Cross-site request forgery
+    short: An attack where another site makes the victim's browser send a request to your site, and the browser attaches the victim's cookies, so it looks genuine.
+    detail: |
+      Defences are `SameSite` cookies, CSRF tokens on state-changing forms and never changing data on `GET`.
+    source: https://owasp.org/www-community/attacks/csrf
+    stack: [owasp]
+    see: [Cookie, XSS, Same-origin policy]
+
+  - term: SQL injection
+    short: An attack where user input is pasted into a SQL query and changes what the query does, for example a name of `' OR '1'='1` that matches every row.
+    detail: |
+      The fix is parameterised queries, where values are sent separately from the SQL text, as in `db.query("SELECT * FROM users WHERE id = $1", [id])`. ORMs do this for you unless you build raw SQL with string concatenation.
+    source: https://owasp.org/www-community/attacks/SQL_Injection
+    stack: [owasp]
+    see: [XSS]
+
+  - term: Principle of least privilege
+    short: Give every user, service and key only the access it needs for its job, and nothing more. When something is compromised, the damage stays small.
+    detail: |
+      In practice, a read-only database user for reporting, a deploy key scoped to one repository, a container that does not run as root.
+    source: https://en.wikipedia.org/wiki/Principle_of_least_privilege
+    stack: []
+    see: [Authorisation, Superuser]
+
+  - term: Zero-day
+    aka: Zero-day vulnerability
+    short: A security flaw that attackers know about before the vendor has a fix. Defenders have had zero days to patch it.
+    fun: The term first described software stolen before its release date, "zero-day software", and only later came to mean the vulnerabilities themselves.
+    source: https://en.wikipedia.org/wiki/Zero-day_vulnerability
+    stack: []
+    see: [CVE]
+
+  - term: CVE
+    aka: Common Vulnerabilities and Exposures
+    short: The public catalogue of known security flaws, each with an ID like `CVE-2021-44228`. Scanners and advisories use the ID so everyone means the same bug.
+    detail: |
+      When `npm audit` or Dependabot flags a package, the alert links to a CVE describing the flaw, affected versions and the fix.
+    fun: The list was launched to the public in September 1999.
+    source: https://en.wikipedia.org/wiki/Common_Vulnerabilities_and_Exposures
+    stack: []
+    see: [Zero-day]
+
+  - term: Phishing
+    short: Tricking people into giving up passwords or running malware with a fake email, message or site that looks like a trusted one.
+    detail: |
+      Phishing-resistant MFA (passkeys, hardware keys) helps because the key checks the real domain, so a look-alike site gets nothing useful.
+    fun: Phishing attacks on AOL accounts were reported in 1995, and the "ph" spelling is usually linked to "phreaking", the older hobby of hacking phone networks.
+    source: https://en.wikipedia.org/wiki/Phishing
+    stack: []
+    see: [MFA]
+
+  - term: Public-key cryptography
+    aka: Asymmetric cryptography
+    short: Cryptography with a key pair. The public key can be shared with anyone; the private key stays secret. Data encrypted with one can only be decrypted with the other, and signatures made with the private key can be checked with the public one.
+    detail: |
+      It is how TLS sets up a secure connection with a stranger, and how SSH keys and signed Git commits work.
+    fun: GCHQ's James Ellis and Clifford Cocks worked out the idea and an RSA-style method in the early 1970s, but it stayed secret until the British government declassified it in 1997.
+    source: https://en.wikipedia.org/wiki/Public-key_cryptography
+    stack: []
+    see: [TLS, Encryption]
+
+  - term: Man-in-the-middle attack
+    aka: MITM, on-path attack
+    short: An attacker secretly sits between two parties, reading or changing the traffic while each side thinks it is talking directly to the other.
+    detail: |
+      TLS with proper certificate checking defeats it. Disabling certificate verification "just to make it work" reopens the door.
+    source: https://en.wikipedia.org/wiki/Man-in-the-middle_attack
+    stack: []
+    see: [TLS, HSTS]
+
+  - term: HSTS
+    aka: HTTP Strict Transport Security
+    short: A response header, `Strict-Transport-Security`, that tells the browser to use only HTTPS for a site for a set time, even if someone types or links `http://`.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security
+    stack: []
+    see: [HTTPS, Man-in-the-middle attack]

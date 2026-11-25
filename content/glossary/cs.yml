@@ -1,0 +1,217 @@
+terms:
+  - term: Algorithm
+    short: A precise, finite list of steps that solves a problem or computes a result, like a recipe a computer can follow.
+    detail: |
+      "Sort this list" is a problem; merge sort and quicksort are algorithms for it. You compare algorithms by correctness first, then by how their time and memory grow with input size.
+    fun: The word comes from the Latinised name of al-Khwarizmi, a Persian scholar who wrote on Indian arithmetic around 825 AD.
+    source: https://en.wikipedia.org/wiki/Algorithm
+    stack: []
+    see: [Big O notation, Data structure]
+
+  - term: Data structure
+    aka: DS
+    short: A way of organising data in memory so certain operations are fast, such as looking up a key, adding to the end, or finding the smallest item.
+    detail: |
+      Choosing one is choosing trade-offs: an array gives instant access by index but slow inserts in the middle; a hash table gives fast lookup by key but no order.
+    source: https://en.wikipedia.org/wiki/Data_structure
+    stack: []
+    see: [Array, Linked list, Hash table, Tree, Graph]
+
+  - term: Big O notation
+    short: A way to describe how an algorithm's running time or memory grows as the input gets bigger, ignoring constants. `O(n)` grows in step with the input; `O(n²)` grows with its square.
+    detail: |
+      Common classes, fastest to slowest: `O(1)`, `O(log n)`, `O(n)`, `O(n log n)`, `O(n²)`, `O(2ⁿ)`. It usually describes the worst case unless stated otherwise.
+    fun: The O stands for the German "Ordnung" (order of approximation). It belongs to a family of notations from the mathematicians Paul Bachmann and Edmund Landau.
+    source: https://en.wikipedia.org/wiki/Big_O_notation
+    stack: []
+    see: [Algorithm]
+
+  - term: Array
+    short: A list of elements stored one after another in memory, each reachable by its index in constant time.
+    detail: |
+      `a[5]` is a single address calculation, so reads by index are `O(1)`. Inserting or deleting in the middle means shifting everything after it, which is `O(n)`.
+    source: https://en.wikipedia.org/wiki/Array_(data_structure)
+    stack: []
+    see: [Linked list, Data structure]
+
+  - term: Linked list
+    short: A sequence of nodes where each node holds a value and a pointer to the next one, so items don't need to sit together in memory.
+    detail: |
+      Inserting or removing next to a node you already hold is `O(1)`, but reaching the k-th item means walking from the head, `O(k)`. Arrays usually win in practice thanks to cache locality.
+    fun: The first linked lists in computing were built in 1955–56 by Allen Newell, Cliff Shaw and Herbert Simon at RAND Corporation for their Information Processing Language.
+    source: https://en.wikipedia.org/wiki/Linked_list
+    stack: []
+    see: [Array, Stack, Queue]
+
+  - term: Hash table
+    aka: Hash map, dictionary
+    short: A structure that stores key-value pairs and finds a value by key in constant time on average, by hashing the key to pick a slot.
+    detail: |
+      JavaScript's `Map`, Python's `dict` and Java's `HashMap` are hash tables. Two keys can land in the same slot (a collision); good hash functions keep that rare.
+    fun: Hans Peter Luhn wrote an internal IBM memo using hashing with chaining in January 1953.
+    source: https://en.wikipedia.org/wiki/Hash_table
+    stack: []
+    see: [Data structure, Big O notation]
+
+  - term: Stack
+    short: A last-in, first-out (LIFO) collection. You `push` onto the top and `pop` off the top, like a pile of plates.
+    detail: |
+      The call stack, undo history and matching brackets all use one. Push too much onto a fixed-size stack and you get a stack overflow.
+
+      Not to be confused with a *tech stack*: the set of technologies an app is built with, such as Next.js, PostgreSQL and Vercel.
+    fun: Stacks entered the computer science literature in 1946, when Alan Turing used the terms "bury" and "unbury" for calling and returning from subroutines.
+    source: https://en.wikipedia.org/wiki/Stack_(abstract_data_type)
+    stack: []
+    see: [Queue, Recursion]
+
+  - term: Queue
+    short: A first-in, first-out (FIFO) collection. Items join at the back and leave from the front, like a line at a shop.
+    detail: |
+      Breadth-first search, print spoolers and job queues all use one. In JavaScript, `array.shift()` is `O(n)`, so a real queue implementation avoids it for large inputs.
+    source: https://en.wikipedia.org/wiki/Queue_(abstract_data_type)
+    stack: []
+    see: [Stack, Message queue]
+
+  - term: Tree
+    short: A hierarchy of nodes where each node has one parent (except the root) and any number of children, with no loops.
+    detail: |
+      The DOM, file systems and database indexes are trees. A binary search tree keeps smaller keys left and larger keys right, so lookups take `O(log n)` while it stays balanced.
+    source: https://en.wikipedia.org/wiki/Tree_(abstract_data_type)
+    stack: []
+    see: [Graph, DOM, Recursion]
+
+  - term: Graph
+    short: A set of nodes (vertices) connected by edges, which may have direction or weights. It models anything with relationships, like road maps or social networks.
+    detail: |
+      Stored as an adjacency list (each node lists its neighbours) or an adjacency matrix. Breadth-first and depth-first search are the basic ways to walk one.
+    source: https://en.wikipedia.org/wiki/Graph_(abstract_data_type)
+    stack: []
+    see: [Tree, Data structure]
+
+  - term: Recursion
+    short: When a function calls itself on a smaller version of the same problem until it reaches a base case it can answer directly.
+    detail: |
+      ```js
+      const fact = (n) => (n <= 1 ? 1 : n * fact(n - 1));
+      ```
+      Forget the base case and the calls never stop, ending in a stack overflow.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Recursion
+    stack: []
+    see: [Stack, Tree, Dynamic programming]
+
+  - term: Binary search
+    short: Finding a value in a sorted list by checking the middle and discarding the half it can't be in, repeating until found. It takes `O(log n)` steps.
+    detail: |
+      A million sorted items need at most about 20 checks. The details are easy to get wrong: off-by-one loop bounds and forgetting to move past the middle element both cause infinite loops or missed values.
+    fun: When Jon Bentley set binary search as a problem for professional programmers, he found about ninety percent failed to write a correct version after several hours.
+    source: https://en.wikipedia.org/wiki/Binary_search
+    stack: []
+    see: [Big O notation, Sorting algorithm]
+
+  - term: Sorting algorithm
+    short: An algorithm that puts items in order. Good general-purpose comparison sorts, such as merge sort, take `O(n log n)` time.
+    detail: |
+      A *stable* sort keeps equal items in their original order, which matters when you sort by one field and then another. Most languages' built-in sorts are well-tuned; use them.
+    fun: Sorting is still an active research topic. Timsort, now widely used, only dates to 2002.
+    source: https://en.wikipedia.org/wiki/Sorting_algorithm
+    stack: []
+    see: [Algorithm, Binary search, Big O notation]
+
+  - term: Dynamic programming
+    aka: DP
+    short: Solving a problem by breaking it into overlapping subproblems, solving each once and reusing the stored answers instead of recomputing them.
+    detail: |
+      Naive recursive Fibonacci is exponential; caching each `fib(k)` (memoisation) or filling a table from the bottom up makes it `O(n)`.
+    fun: Richard Bellman said he picked the name partly to hide that he was doing mathematical research, because the US Secretary of Defense at the time, Charles Wilson, hated the word "research".
+    source: https://en.wikipedia.org/wiki/Dynamic_programming
+    stack: []
+    see: [Recursion, Algorithm]
+
+  - term: Bit
+    aka: Binary digit
+    short: 'The smallest unit of information: a single 0 or 1.'
+    detail: |
+      Every number, letter and pixel a computer handles is ultimately a pattern of bits. n bits can represent 2ⁿ different values, so 8 bits give 256.
+    fun: Claude Shannon first used the word in print in 1948 and credited John Tukey, who had shortened "binary digit" to "bit" in a 1947 Bell Labs memo.
+    source: https://en.wikipedia.org/wiki/Bit
+    stack: []
+    see: [Byte, Hexadecimal]
+
+  - term: Byte
+    short: A group of bits, today almost always 8, and the smallest unit of memory most computers can address.
+    detail: |
+      One byte holds a value from 0 to 255, enough for one ASCII character. File sizes and memory are counted in bytes: KB, MB, GB.
+    fun: Werner Buchholz coined the term in 1956, deliberately respelling "bite" so it couldn't be mistaken for "bit".
+    source: https://en.wikipedia.org/wiki/Byte
+    stack: []
+    see: [Bit, UTF-8, Hexadecimal]
+
+  - term: Hexadecimal
+    aka: Hex, base 16
+    short: Writing numbers in base 16, using the digits 0–9 and the letters A–F. One hex digit is exactly four bits, so a byte is two hex digits.
+    detail: |
+      That's why colours look like `#FF8800`, memory addresses like `0x7ffe`, and hashes like `3f2a…`. In C, JavaScript and many other languages the `0x` prefix marks a hex literal.
+    source: https://en.wikipedia.org/wiki/Hexadecimal
+    stack: []
+    see: [Bit, Byte]
+
+  - term: UTF-8
+    short: The most common way to encode Unicode text as bytes. Each character takes one to four bytes, and plain ASCII text is already valid UTF-8.
+    detail: |
+      `"é".length` is 1 in JavaScript but the character is 2 bytes in UTF-8, which is why byte limits and character limits differ. Garbled text like `Ã©` usually means UTF-8 bytes were read as another encoding.
+    fun: Ken Thompson's design was sketched on a placemat in a New Jersey diner with Rob Pike on 2 September 1992.
+    source: https://en.wikipedia.org/wiki/UTF-8
+    stack: []
+    see: [Byte]
+
+  - term: Floating point
+    short: 'The usual way computers store real numbers: a fixed number of significant binary digits plus an exponent. Many decimals can only be approximated.'
+    detail: |
+      ```js
+      0.1 + 0.2 === 0.3 // false: 0.30000000000000004
+      ```
+      0.1 has an endlessly repeating binary form, so it gets rounded. Never use floats for money; use integer cents or a decimal type.
+    source: https://en.wikipedia.org/wiki/Floating-point_arithmetic
+    stack: []
+    see: [Bit]
+
+  - term: Deterministic
+    short: A deterministic algorithm always produces the same output, through the same steps, for the same input.
+    detail: |
+      Anything reading the clock, random numbers or the network breaks this. Tests and builds should be deterministic so a failure means something; inject time and randomness so they can be fixed in tests.
+    source: https://en.wikipedia.org/wiki/Deterministic_algorithm
+    stack: []
+    see: [Algorithm, Race condition]
+
+  - term: Concurrency
+    short: Structuring a program so several tasks make progress in overlapping time periods. Parallelism is the narrower case where they literally run at the same moment on different cores.
+    detail: |
+      Node.js is concurrent on one thread: while one request waits for the database, another runs. Parallelism needs multiple cores or machines.
+    source: https://en.wikipedia.org/wiki/Concurrent_computing
+    stack: []
+    see: [Race condition, Deadlock, Thread, Event loop]
+
+  - term: Race condition
+    short: A bug where the result depends on the unpredictable timing of two or more things running at once, such as two requests updating the same counter.
+    detail: |
+      Two requests both read `stock = 1`, both see it's available, both sell it. Fixes: locks, atomic operations, or a database constraint or transaction that makes the check and update one step.
+    fun: The term was already in use by 1954, in David A. Huffman's doctoral thesis on sequential switching circuits.
+    source: https://en.wikipedia.org/wiki/Race_condition
+    stack: []
+    see: [Concurrency, Deadlock, Transaction]
+
+  - term: Deadlock
+    short: When two or more tasks each wait for a resource another one holds, so none of them can ever continue.
+    detail: |
+      Classic case: task A locks row 1 then wants row 2, while task B locks row 2 then wants row 1. Always taking locks in the same order prevents it.
+    fun: The four conditions needed for deadlock are called the Coffman conditions, after Edward G. Coffman Jr., who first described them in a 1971 article.
+    source: https://en.wikipedia.org/wiki/Deadlock_(computer_science)
+    stack: []
+    see: [Race condition, Concurrency]
+
+  - term: Bug
+    short: A defect in software that makes it behave in a way nobody intended, from a wrong number on screen to a crash.
+    fun: Engineers called defects "bugs" by the 1870s; Edison used the word in an 1878 letter. Around 1947, operators of the Harvard Mark II found a moth in a relay and taped it in the log as the "first actual case of bug being found".
+    source: https://en.wikipedia.org/wiki/Software_bug
+    stack: []
+    see: [Debugger, Race condition]

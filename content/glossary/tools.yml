@@ -1,0 +1,182 @@
+terms:
+  - term: Git
+    short: The version control system almost everyone uses. It records snapshots of your project over time, so you can see history, undo changes and work on branches in parallel.
+    detail: |
+      Git is distributed: every clone holds the full history, so most commands work offline. You share work by pushing to and pulling from a remote such as GitHub.
+    fun: Its own manual page describes Git as "the stupid content tracker".
+    source: https://git-scm.com/docs/git
+    stack: [git]
+    see: [Commit, Branch, GitHub]
+
+  - term: GitHub
+    short: A website that hosts Git repositories and adds collaboration on top, such as pull requests, code review, issues and GitHub Actions for CI/CD.
+    detail: |
+      Git is the tool; GitHub is one service that hosts it. GitLab and Bitbucket are alternatives.
+    fun: GitHub, Inc. has been a subsidiary of Microsoft since 2018.
+    source: https://en.wikipedia.org/wiki/GitHub
+    stack: [github]
+    see: [Git, Pull request, CI/CD]
+
+  - term: Commit
+    short: A saved snapshot of your project in Git, with a message saying what changed and why. Each commit points to its parent, forming the history.
+    detail: |
+      You stage changes with `git add`, then record them with `git commit -m "Fix login redirect"`. Every commit has a unique hash that names it.
+    source: https://git-scm.com/docs/git-commit
+    stack: [git]
+    see: [Git, Branch]
+
+  - term: Branch
+    short: A movable name that points at a commit, letting you build a feature or fix apart from the main line and merge it back later.
+    detail: |
+      Each new commit on a branch moves the pointer forward. `git switch -c feature/login` creates one and switches to it.
+    fun: A Git branch is just a file holding the 40-character hash of the commit it points to, so creating one means writing 41 bytes.
+    source: https://git-scm.com/book/en/v2/Git-Branching-Branches-in-a-Nutshell
+    stack: [git]
+    see: [Commit, Pull request, Merge conflict]
+
+  - term: Pull request
+    aka: PR, merge request
+    short: A request to merge one branch into another, with a page where teammates review the diff, comment and see CI results before it lands.
+    detail: |
+      GitLab calls the same thing a merge request. Small, focused PRs get reviewed faster and break less.
+    source: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests
+    stack: [github]
+    see: [Branch, GitHub, CI/CD]
+
+  - term: Merge conflict
+    short: What happens when two branches changed the same lines (or one edited a file the other deleted), so Git can't combine them on its own and asks you to choose.
+    detail: |
+      Git marks the clash in the file between `<<<<<<<`, `=======` and `>>>>>>>`. You edit it to the right result, remove the markers, then `git add` and commit.
+    source: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/addressing-merge-conflicts/about-merge-conflicts
+    stack: [git]
+    see: [Branch, Pull request]
+
+  - term: CI/CD
+    aka: Continuous integration, continuous delivery or deployment
+    short: Automation that builds and tests every change as soon as it's pushed (CI), then releases passing builds to an environment (CD).
+    detail: |
+      A pipeline such as GitHub Actions runs on each pull request: install, lint, test, build. Continuous delivery keeps every build ready to release; continuous deployment ships it automatically.
+    source: https://en.wikipedia.org/wiki/CI/CD
+    stack: [githubactions]
+    see: [Pull request, Deployment environment]
+
+  - term: Docker
+    short: A tool for building and running containers. You describe an app's environment in a `Dockerfile`, build it into an image, and run that image the same way anywhere.
+    detail: |
+      It ends "works on my machine": the image carries the exact OS packages, runtime and dependencies. Docker Compose runs several containers together for local development.
+    fun: Solomon Hykes started it as an internal project at dotCloud, a platform-as-a-service company. It was first released in 2013.
+    source: https://en.wikipedia.org/wiki/Docker_(software)
+    stack: [docker]
+    see: [Container, Container image, Kubernetes]
+
+  - term: Container
+    short: A running process isolated from the rest of the machine, with its own filesystem, network and process list, but sharing the host's kernel.
+    detail: |
+      Because there's no separate OS kernel to boot, containers start in moments and use far less memory than virtual machines. Each one runs from an image.
+    source: https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/
+    stack: [docker]
+    see: [Container image, Docker, Kernel]
+
+  - term: Container image
+    short: A read-only package holding everything an app needs to run (files, libraries, runtime, settings), used as the template for starting containers.
+    detail: |
+      Images are built in layers, one per `Dockerfile` instruction, and cached, so rebuilding after a small code change is quick. They're stored in registries such as Docker Hub.
+    source: https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-an-image/
+    stack: [docker]
+    see: [Container, Docker]
+
+  - term: Kubernetes
+    aka: K8s
+    short: A system that runs containers across a cluster of machines. You declare what you want running, and it schedules, restarts, scales and connects the containers to match.
+    detail: |
+      The basic unit is a pod (one or more containers). Deployments keep a set number of pods alive; Services give them a stable address and load-balance between them.
+    fun: The name comes from the Greek for helmsman or pilot, and "K8s" counts the eight letters between the K and the s.
+    source: https://kubernetes.io/docs/concepts/overview/
+    stack: [kubernetes]
+    see: [Container, Docker, Load balancer]
+
+  - term: IDE
+    aka: Integrated development environment
+    short: An editor that bundles the tools you code with, such as autocomplete, refactoring, a debugger, a terminal and Git, in one app.
+    detail: |
+      VS Code, IntelliJ IDEA and Xcode are common choices. Much of the smartness comes from language servers that understand your code's types.
+    fun: Dartmouth BASIC, created in 1964, was the first language to have an IDE.
+    source: https://en.wikipedia.org/wiki/Integrated_development_environment
+    stack: []
+    see: [Debugger, Linter]
+
+  - term: Linter
+    short: A tool that reads your code without running it and flags likely bugs and bad patterns, such as unused variables or a missing `await`.
+    detail: |
+      ESLint is the usual one for JavaScript and TypeScript; Ruff and Pylint for Python. Run it in your editor and in CI.
+    fun: The name comes from the original `lint` tool, written at Bell Labs in 1978 and named after the fluff a dryer's lint trap catches.
+    source: https://en.wikipedia.org/wiki/Lint_(software)
+    stack: [eslint]
+    see: [Code formatter, CI/CD]
+
+  - term: Code formatter
+    short: A tool that rewrites code into one consistent style (indentation, quotes, line breaks) automatically, so nobody argues about style in review.
+    detail: |
+      Prettier, gofmt and Black are examples. A formatter changes layout only; a linter looks for problems.
+    source: https://prettier.io/docs/
+    stack: [prettier]
+    see: [Linter]
+
+  - term: Debugger
+    short: A tool that lets you pause a running program at a breakpoint, step through it line by line and inspect variables, to see why it misbehaves.
+    detail: |
+      Browser dev tools, VS Code and `node --inspect` all include one. It's often faster than scattering `console.log` calls.
+    source: https://en.wikipedia.org/wiki/Debugger
+    stack: []
+    see: [IDE, Bug]
+
+  - term: Deployment environment
+    aka: dev, staging, production
+    short: A separate copy of a system for one stage of its life. Developers work in dev, changes are checked in staging, and real users hit production.
+    detail: |
+      Staging should match production as closely as possible. Each environment has its own config, secrets and database, usually set through environment variables.
+    source: https://en.wikipedia.org/wiki/Deployment_environment
+    stack: []
+    see: [CI/CD, Environment variable]
+
+  - term: Semantic versioning
+    aka: SemVer
+    short: A version number in the form MAJOR.MINOR.PATCH. Bump MAJOR for breaking changes, MINOR for new backwards-compatible features and PATCH for bug fixes.
+    detail: |
+      Package managers rely on it. In npm, `^1.4.2` allows any `1.x.x` from 1.4.2 up, and `~1.4.2` allows only `1.4.x`.
+    source: https://semver.org/
+    stack: []
+    see: [Dependency, npm]
+
+  - term: Monorepo
+    short: One repository holding many projects, such as a web app, an API and shared libraries, instead of a separate repo for each.
+    detail: |
+      Shared code changes land in a single commit across everything that uses it. Tools like pnpm workspaces, Turborepo and Nx help build and test only what changed.
+    fun: Google keeps billions of lines of code in a single repository.
+    source: https://en.wikipedia.org/wiki/Monorepo
+    stack: []
+    see: [Git]
+
+  - term: Markdown
+    short: A lightweight way to format plain text, with `#` for headings, `*` for emphasis and backticks for code. It's used for READMEs, docs and comments.
+    detail: |
+      There are several flavours; CommonMark is a strict specification, and GitHub Flavored Markdown adds tables and task lists.
+    fun: John Gruber released it in 2004.
+    source: https://en.wikipedia.org/wiki/Markdown
+    stack: [markdown]
+    see: [YAML]
+
+  - term: YAML
+    short: A human-friendly data format that uses indentation for nesting. It's common for config files such as CI pipelines, Docker Compose and Kubernetes manifests.
+    detail: |
+      ```yaml
+      services:
+        web:
+          image: nginx
+          ports: ["8080:80"]
+      ```
+      Indentation matters and tabs aren't allowed. Quote strings that could be mistaken for numbers or booleans.
+    fun: It originally stood for "Yet Another Markup Language", later changed to the recursive "YAML Ain't Markup Language".
+    source: https://en.wikipedia.org/wiki/YAML
+    stack: [yaml]
+    see: [Markdown]

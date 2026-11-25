@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ChevronRightIcon } from "@/components/icons";
+import { StreakBadge } from "@/components/streak-badge";
 import { TodaySession } from "@/components/today-session";
 import { getCurrentUser } from "@/lib/session";
 import { TRPCReactProvider } from "@/trpc/client";
@@ -38,7 +39,8 @@ function TodaySkeleton() {
 // Reads the session and the due queue at request time, so it streams in behind Suspense.
 async function Today() {
   await getCurrentUser(); // redirects to /sign-in when signed out
-  const { items, totals, seed } = await (await getCaller()).session.today();
+  const caller = await getCaller();
+  const [{ items, totals, seed }, streak] = await Promise.all([caller.session.today(), caller.session.streak()]);
 
   return (
     <>
@@ -47,6 +49,7 @@ async function Today() {
         <span className="mx-1.5">·</span>
         {totals.seen} of {totals.cards} started
       </p>
+      <StreakBadge streak={streak} className="mt-3" />
       <div className="mt-6">
         <TRPCReactProvider>
           <TodaySession items={items} seed={seed} />

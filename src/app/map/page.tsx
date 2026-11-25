@@ -2,15 +2,21 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { PassEmboss } from "@/components/module-art";
 import { Field, ModuleBadge, hueFor, moduleParts } from "@/components/pass";
-import { BRANCH_PREREQS, FOUNDATIONS, type ModuleId } from "@/lib/content/schema";
+import { BRANCH_PREREQS, MODULE_GROUPS, type ModuleId } from "@/lib/content/schema";
 import { getCurrentUser } from "@/lib/session";
 import type { ModuleProgress } from "@/server/srs";
 import { getCaller } from "@/trpc/server";
 
 export const metadata: Metadata = { title: "Curriculum map" };
 
-const BRANCHES = Object.keys(BRANCH_PREREQS) as (keyof typeof BRANCH_PREREQS)[];
-const ACROSS: ModuleId[] = ["swe", "leetcode", "stack", "interview"];
+const HINTS: Record<(typeof MODULE_GROUPS)[number]["id"], string> = {
+  foundations: "Every track assumes these",
+  roles: "Each builds on three foundations",
+  cs: "What's under the hood",
+  languages: "Idioms and traps",
+  frameworks: "The tools you ship with",
+  practice: "For the interview itself",
+};
 const EMPTY: ModuleProgress = { total: 0, started: 0, mature: 0, due: 0 };
 
 export default function MapPage() {
@@ -43,35 +49,30 @@ function CurriculumMap({ progress, loading = false }: { progress: Record<string,
 
   return (
     <div className={`mt-8 space-y-10 ${loading ? "animate-pulse" : ""}`}>
-      <Stack title="Role branches" hint="Each builds on three foundations">
-        {BRANCHES.map((id) => (
-          <ModulePass key={id} id={id} p={of(id)}>
-            <div className="flex flex-wrap items-center gap-1.5">
-              <span className="field-label mr-1">Needs</span>
-              {BRANCH_PREREQS[id].map((f) => (
-                <span key={f} className="rounded-md bg-[var(--well)] px-1.5 py-0.5 text-xs font-semibold">
-                  {moduleParts(f).code}
-                </span>
-              ))}
-              <span className="ml-auto text-sm tabular-nums">
-                {Math.round(readiness(BRANCH_PREREQS[id]) * 100)}% of those mature
-              </span>
-            </div>
-          </ModulePass>
-        ))}
-      </Stack>
-
-      <Stack title="Foundations" hint="Every branch assumes these">
-        {FOUNDATIONS.map((id) => (
-          <ModulePass key={id} id={id} p={of(id)} />
-        ))}
-      </Stack>
-
-      <Stack title="Across branches">
-        {ACROSS.map((id) => (
-          <ModulePass key={id} id={id} p={of(id)} />
-        ))}
-      </Stack>
+      {MODULE_GROUPS.map((g) => (
+        <Stack key={g.id} title={g.title} hint={HINTS[g.id]}>
+          {g.modules.map((id: ModuleId) => {
+            const prereqs = (BRANCH_PREREQS as Partial<Record<ModuleId, readonly ModuleId[]>>)[id];
+            return (
+              <ModulePass key={id} id={id} p={of(id)}>
+                {prereqs && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <span className="field-label mr-1">Needs</span>
+                    {prereqs.map((f) => (
+                      <span key={f} className="rounded-md bg-[var(--well)] px-1.5 py-0.5 text-xs font-semibold">
+                        {moduleParts(f).code}
+                      </span>
+                    ))}
+                    <span className="ml-auto text-sm tabular-nums">
+                      {Math.round(readiness(prereqs) * 100)}% of those mature
+                    </span>
+                  </div>
+                )}
+              </ModulePass>
+            );
+          })}
+        </Stack>
+      ))}
     </div>
   );
 }

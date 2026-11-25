@@ -470,3 +470,44 @@ textarea {
 .theme-popover::backdrop {
   background: rgb(0 0 0 / 0.4);
 }
+
+/* Notes are free-form Markdown, so their headings need sizes cards never use. */
+.note-md h1,
+.note-md h2,
+.note-md h3,
+.note-md h4 {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+}
+.note-md h1 {
+  font-size: 1.5rem;
+}
+.note-md h2 {
+  font-size: 1.25rem;
+}
+.note-md h3 {
+  font-size: 1.0625rem;
+}
+.note-md * + :is(h1, h2, h3, h4) {
+  margin-top: 1.25em;
+}
+.note-md blockquote {
+  border-left: 3px solid var(--sep);
+  padding-left: 0.875rem;
+  color: var(--label-2);
+}
+.note-md hr {
+  border-color: var(--sep);
+}
+.note-md table {
+  border-collapse: collapse;
+}
+.note-md :is(th, td) {
+  border: 1px solid var(--sep);
+  padding: 0.25rem 0.5rem;
+}
+.note-md img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}

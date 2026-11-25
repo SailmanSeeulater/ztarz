@@ -1,7 +1,14 @@
 import matter from "gray-matter";
 import { Marked } from "marked";
 import {
+  GLOSSARY_CATEGORIES,
   LAB_SECTIONS,
+  SOLUTION_SECTIONS,
+  glossaryFileSchema,
+  solutionFrontMatterSchema,
+  type GlossaryCategory,
+  type GlossaryTerm,
+  type Solution,
   REQUIRED_SECTIONS,
   frontMatterSchema,
   labFrontMatterSchema,
@@ -129,6 +136,57 @@ export function parseLab(id: string, raw: string): Lab {
     minutes,
     source,
     checks,
+    stack: fm.data.stack.map((slug) => resolveStack(slug) as StackLogo),
+    sections: sections.map((s) => ({ key: s.key, heading: s.heading, html: render(s.markdown) })),
+  };
+}
+
+const formatIssues = (issues: { path: PropertyKey[]; message: string }[]) =>
+  issues.map((i) => `${i.path.join(".") || "(root)"}: ${i.message}`).join("\n  - ");
+
+/** Parse one glossary file (YAML, `terms:` list) for a category. */
+export function parseGlossary(category: string, raw: string): GlossaryTerm[] {
+  const id = `glossary/${category}`;
+  if (!(category in GLOSSARY_CATEGORIES)) {
+    throw new CardError(id, `unknown category (use one of ${Object.keys(GLOSSARY_CATEGORIES).join(", ")})`);
+  }
+  const { data } = matter(`---\n${raw}\n---\n`);
+  const parsed = glossaryFileSchema.safeParse(data);
+  if (!parsed.success) throw new CardError(id, `invalid file\n  - ${formatIssues(parsed.error.issues)}`);
+  return parsed.data.terms.map((t) => {
+    const unknown = t.stack.filter((slug) => !resolveStack(slug));
+    if (unknown.length) throw new CardError(id, `${t.term}: unknown stack: ${unknown.join(", ")}`);
+    return {
+      id: slugify(t.term),
+      term: t.term,
+      ...(t.aka && { aka: t.aka }),
+      category: category as GlossaryCategory,
+      shortHtml: renderInline(t.short),
+      ...(t.detail && { detailHtml: render(t.detail) }),
+      ...(t.fun && { funHtml: renderInline(t.fun) }),
+      source: t.source,
+      stack: t.stack.map((slug) => resolveStack(slug) as StackLogo),
+      see: t.see,
+    };
+  });
+}
+
+/** Parse one LeetCode solution walk-through. */
+export function parseSolution(id: string, raw: string): Solution {
+  const { data, content } = matter(raw);
+  const fm = solutionFrontMatterSchema.safeParse(data);
+  if (!fm.success) throw new CardError(id, `invalid front-matter\n  - ${formatIssues(fm.error.issues)}`);
+  if (!/^https:\/\/leetcode\.com\/problems\/[a-z0-9-]+\/$/.test(fm.data.source)) {
+    throw new CardError(id, "source must be the problem page, https://leetcode.com/problems/<slug>/");
+  }
+  const unknown = fm.data.stack.filter((slug) => !resolveStack(slug));
+  if (unknown.length) throw new CardError(id, `unknown stack: ${unknown.join(", ")}`);
+  const sections = splitSections(content);
+  const missing = SOLUTION_SECTIONS.filter((k) => !sections.some((s) => s.key === k));
+  if (missing.length) throw new CardError(id, `missing sections: ${missing.map((k) => `## ${k}`).join(", ")}`);
+  return {
+    id,
+    ...fm.data,
     stack: fm.data.stack.map((slug) => resolveStack(slug) as StackLogo),
     sections: sections.map((s) => ({ key: s.key, heading: s.heading, html: render(s.markdown) })),
   };

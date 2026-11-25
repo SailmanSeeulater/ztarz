@@ -1,0 +1,195 @@
+terms:
+  - term: Database
+    short: An organised store of data that a program can query and update, usually run by a database management system (DBMS) that handles storage, concurrency and recovery.
+    detail: |
+      Most apps keep their lasting state in one. Relational databases store tables and speak SQL; NoSQL databases use documents, key-value pairs or graphs instead.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Database
+    stack: []
+    see: [SQL, NoSQL, Relational database]
+
+  - term: SQL
+    aka: Structured Query Language
+    short: The standard language for asking a relational database for data and changing it, with statements like `SELECT`, `INSERT`, `UPDATE` and `DELETE`.
+    detail: |
+      SQL is declarative: you describe the rows you want, and the database decides how to fetch them.
+      ```sql
+      SELECT name FROM users WHERE created_at > now() - interval '7 days';
+      ```
+    fun: It was first called SEQUEL. The name was cut to SQL because "SEQUEL" was a trademark of a UK aircraft company, Hawker Siddeley.
+    source: https://en.wikipedia.org/wiki/SQL
+    stack: []
+    see: [Relational database, Query planner, CRUD]
+
+  - term: NoSQL
+    short: A loose label for databases that don't use the relational table model, such as document, key-value, wide-column and graph stores.
+    detail: |
+      They trade some relational features (joins, strict schemas, sometimes full transactions) for flexible data shapes or easier horizontal scaling. Many now support SQL-like queries anyway.
+    fun: The name was first used in 1998 by Carlo Strozzi for a database that was in fact relational; it just didn't expose SQL.
+    source: https://en.wikipedia.org/wiki/NoSQL
+    stack: []
+    see: [MongoDB, Redis, Relational database]
+
+  - term: Relational database
+    aka: RDBMS
+    short: A database that stores data in tables of rows and columns and links tables through keys. You query it with SQL.
+    detail: |
+      Each table holds one kind of thing (users, orders). A foreign key in `orders` points at a row in `users`, and a join brings them back together in a query.
+    fun: It rests on the relational model that E. F. Codd proposed in 1970.
+    source: https://en.wikipedia.org/wiki/Relational_database
+    stack: []
+    see: [SQL, Primary key, Foreign key, Normalisation]
+
+  - term: PostgreSQL
+    aka: Postgres
+    short: A popular open-source relational database, known for strict correctness, rich SQL features, JSON support and extensions.
+    detail: |
+      It runs as a server process that clients connect to over TCP. Extensions such as PostGIS and pgvector add geospatial and vector search.
+    fun: It began at UC Berkeley as POSTGRES, the successor to the Ingres database. The SQL in the name was added in 1996.
+    source: https://en.wikipedia.org/wiki/PostgreSQL
+    stack: [postgresql]
+    see: [Relational database, MySQL, SQLite]
+
+  - term: MySQL
+    short: A widely used open-source relational database, long the "M" in the classic LAMP web stack. Now owned by Oracle.
+    detail: |
+      MariaDB is a community fork started by MySQL's original developers and is largely compatible with it.
+    fun: It is named after My, the daughter of co-founder Michael "Monty" Widenius.
+    source: https://en.wikipedia.org/wiki/MySQL
+    stack: [mysql]
+    see: [PostgreSQL, Relational database]
+
+  - term: SQLite
+    short: A small relational database that runs inside your program as a library and keeps the whole database in a single file. No server needed.
+    detail: |
+      Good for mobile apps, desktop apps, tests and small sites. It allows only one writer at a time, so it is a poor fit for many concurrent writers.
+    fun: Its authors reckon SQLite is used more than all other database engines combined, with billions of copies in phones, browsers and other software.
+    source: https://www.sqlite.org/mostdeployed.html
+    stack: [sqlite]
+    see: [PostgreSQL, Relational database]
+
+  - term: Redis
+    short: An in-memory key-value store, very fast because data lives in RAM. Common uses are caching, sessions, rate limiting, queues and leaderboards.
+    detail: |
+      Values can be strings, lists, sets, sorted sets, hashes and streams. It can persist to disk, but treat it as a cache unless you've set up persistence on purpose.
+    fun: The name is short for Remote Dictionary Server.
+    source: https://en.wikipedia.org/wiki/Redis
+    stack: [redis]
+    see: [NoSQL, Cache invalidation, Rate limit]
+
+  - term: MongoDB
+    short: A popular document database. It stores records as JSON-like documents (BSON), so each record can have its own shape.
+    detail: |
+      Related data is often embedded in one document instead of split across tables. That makes reads of a whole object fast, but data you need to join across documents is harder to keep consistent.
+    source: https://www.mongodb.com/docs/manual/core/document/
+    stack: [mongodb]
+    see: [NoSQL, Database]
+
+  - term: Primary key
+    short: The column (or set of columns) that uniquely identifies each row in a table. It must be unique and not null.
+    detail: |
+      Usually an auto-incrementing integer or a UUID called `id`. The database builds an index on it automatically, so lookups by primary key are fast.
+    source: https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-PRIMARY-KEYS
+    stack: []
+    see: [Foreign key, Database index]
+
+  - term: Foreign key
+    short: A column whose value must match a primary key in another table. It links rows together and stops you pointing at rows that don't exist.
+    detail: |
+      `orders.user_id REFERENCES users(id)` means every order must belong to a real user. You choose what happens when the user is deleted: block it, cascade the delete, or set the column to null.
+    source: https://www.postgresql.org/docs/current/ddl-constraints.html#DDL-CONSTRAINTS-FK
+    stack: []
+    see: [Primary key, Relational database]
+
+  - term: Database index
+    short: An extra data structure, usually a B-tree, that lets the database find rows by a column's value without scanning the whole table.
+    detail: |
+      Like a book's index. It speeds up reads that filter or sort on that column, but every insert and update must also update the index, and it takes disk space.
+    source: https://www.postgresql.org/docs/current/indexes-intro.html
+    stack: []
+    see: [Query planner, Primary key]
+
+  - term: Query planner
+    aka: Query optimiser
+    short: The part of a database that decides how to run a SQL query, for example which index to use and in what order to join tables.
+    detail: |
+      It estimates costs from table statistics and picks the cheapest plan. `EXPLAIN` shows the plan it chose; `EXPLAIN ANALYZE` also runs the query and shows real timings.
+    source: https://www.postgresql.org/docs/current/using-explain.html
+    stack: []
+    see: [Database index, SQL]
+
+  - term: Transaction
+    short: A group of database changes that succeed or fail together. Either all of them are saved (`COMMIT`) or none are (`ROLLBACK`).
+    detail: |
+      The classic example is a bank transfer: debit one account and credit another. If anything fails halfway, the transaction rolls back and no money disappears.
+    source: https://www.postgresql.org/docs/current/tutorial-transactions.html
+    stack: []
+    see: [ACID]
+
+  - term: ACID
+    aka: Atomicity, Consistency, Isolation, Durability
+    short: The four guarantees a reliable database gives for transactions. All or nothing, rules always hold, concurrent transactions don't trip over each other, and committed data survives a crash.
+    fun: The acronym was coined in 1983 by Andreas Reuter and Theo Härder.
+    source: https://en.wikipedia.org/wiki/ACID
+    stack: []
+    see: [Transaction, Relational database]
+
+  - term: ORM
+    aka: Object-relational mapping
+    short: A library that maps database tables to objects in your code, so you can query and save data with method calls instead of hand-written SQL.
+    detail: |
+      Examples are Prisma, Drizzle, Hibernate and Django's ORM. They save boilerplate, but can hide slow queries such as the N+1 problem, so check the SQL they generate.
+    source: https://en.wikipedia.org/wiki/Object%E2%80%93relational_mapping
+    stack: []
+    see: [SQL, Schema migration]
+
+  - term: Schema migration
+    aka: Database migration
+    short: A versioned script that changes a database's structure, such as adding a table or a column. Migrations run in order so every environment ends up with the same schema.
+    detail: |
+      They live in the repo next to the code. On a live system, prefer small, backwards-compatible steps: add the new column, backfill it, switch the code, then drop the old one.
+    source: https://en.wikipedia.org/wiki/Schema_migration
+    stack: []
+    see: [ORM, Relational database]
+
+  - term: Normalisation
+    aka: Database normalization
+    short: Designing tables so each fact is stored in exactly one place, which avoids duplicated data drifting out of sync.
+    detail: |
+      Instead of copying a customer's address onto every order, store it once in `customers` and point to it. Denormalising on purpose (copying data) can make some reads faster at the cost of keeping copies in step.
+    source: https://en.wikipedia.org/wiki/Database_normalization
+    stack: []
+    see: [Relational database, Foreign key]
+
+  - term: Database replication
+    short: Keeping copies of a database on several servers. Usually one primary takes writes and replicas copy its changes and serve reads.
+    detail: |
+      Replication gives you failover and spreads read load. With asynchronous replication a replica can lag a little behind, so a read straight after a write may not see it yet.
+    source: https://www.postgresql.org/docs/current/high-availability.html
+    stack: []
+    see: [Sharding, Database]
+
+  - term: Sharding
+    short: Splitting one large dataset across several database servers, each holding part of the rows (a shard), usually chosen by a key such as user ID.
+    detail: |
+      It lets writes and storage scale past one machine. The cost is complexity: queries that span shards, rebalancing, and picking a key that spreads load evenly.
+    fun: One claimed origin of the word is the 1997 online game Ultima Online, whose creator recalled the term coming from the game's production.
+    source: https://en.wikipedia.org/wiki/Shard_(database_architecture)
+    stack: []
+    see: [Database replication]
+
+  - term: Connection pool
+    short: A set of open database connections that the app reuses instead of opening a new one for every request, because opening a connection is slow.
+    detail: |
+      A request borrows a connection, runs its queries and hands it back. Size the pool to what the database can handle; serverless functions often need an external pooler such as PgBouncer.
+    source: https://en.wikipedia.org/wiki/Connection_pool
+    stack: []
+    see: [Database, Serverless]
+
+  - term: CRUD
+    aka: Create, Read, Update, Delete
+    short: The four basic operations on stored data. Most business apps are largely CRUD screens over a database.
+    detail: |
+      They map loosely to SQL `INSERT`, `SELECT`, `UPDATE`, `DELETE` and to HTTP `POST`, `GET`, `PUT`/`PATCH`, `DELETE`.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/CRUD
+    stack: []
+    see: [SQL, REST]

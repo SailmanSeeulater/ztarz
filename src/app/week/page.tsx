@@ -32,7 +32,8 @@ export default function WeekPage() {
 
 async function Report() {
   await getCurrentUser();
-  const r = await (await getCaller()).session.week();
+  const caller = await getCaller();
+  const [r, streak] = await Promise.all([caller.session.week(), caller.session.streak()]);
   const fmt = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", timeZone: appTimeZone() });
   const range = `${fmt.format(r.from)} – ${fmt.format(r.days.at(-1)!.start)}`;
 
@@ -45,6 +46,10 @@ async function Report() {
           <Field label="Reviews">{r.reviews}</Field>
           <Field label="Days practised">{r.daysPractised} of 7</Field>
           <Field label="Kept">{r.kept === null ? "–" : `${Math.round(r.kept * 100)}%`}</Field>
+          <Field label="Streak">
+            {streak.current} {streak.current === 1 ? "day" : "days"}
+            {streak.longest > streak.current && <span className="text-[var(--ink-2)]"> · best {streak.longest}</span>}
+          </Field>
         </dl>
         <div className="mt-5 border-t border-[var(--well-strong)] pt-4">
           <DayBars days={r.days} label="Reviews each day" highlightLast />

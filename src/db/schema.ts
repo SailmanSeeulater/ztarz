@@ -73,3 +73,17 @@ export const labAttempt = pgTable("lab_attempt", {
   evidence: jsonb(), // what the verify check saw
   createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
 });
+
+/** Your own notes, in Markdown. Limits (count, length) live in src/lib/notes.ts. */
+export const note = pgTable(
+  "note",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: userId(),
+    title: text().notNull().default(""),
+    body: text().notNull().default(""),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index().on(t.userId, t.updatedAt)],
+);

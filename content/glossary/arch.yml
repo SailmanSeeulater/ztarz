@@ -1,0 +1,172 @@
+terms:
+  - term: API
+    aka: Application Programming Interface
+    short: A defined set of functions or requests one piece of software offers so other software can use it without knowing how it works inside.
+    detail: |
+      A browser API like `fetch()` and a web API like `GET /users/42` are both APIs: a contract of inputs and outputs. Change the inside freely; change the contract carefully, because callers depend on it.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/API
+    stack: []
+    see: [REST, GraphQL, RPC, SDK]
+
+  - term: REST
+    aka: Representational State Transfer
+    short: An architectural style for web APIs where URLs name resources and standard HTTP methods act on them, with each request carrying everything the server needs.
+    detail: |
+      `GET /orders/7` reads an order, `DELETE /orders/7` removes it. Responses are representations (usually JSON) of the resource, and statelessness plus caching are what let REST scale.
+    fun: Roy Fielding introduced and defined the term in his 2000 PhD dissertation at the University of California, Irvine.
+    source: https://en.wikipedia.org/wiki/REST
+    stack: []
+    see: [API, HTTP method, Stateless, Idempotent]
+
+  - term: GraphQL
+    short: A query language for APIs where the client asks for exactly the fields it wants, usually from a single endpoint, and gets back JSON in that same shape.
+    detail: |
+      ```graphql
+      { user(id: 42) { name posts { title } } }
+      ```
+      It avoids over-fetching and many round trips, but moves complexity (caching, query cost limits, N+1 lookups) onto the server.
+    fun: Facebook started building GraphQL in 2012 and released the draft spec and reference implementation as open source in 2015.
+    source: https://en.wikipedia.org/wiki/GraphQL
+    stack: [graphql]
+    see: [REST, API]
+
+  - term: gRPC
+    short: An open-source RPC framework that sends calls over HTTP/2, with services and messages defined in Protocol Buffers so client and server code can be generated.
+    detail: |
+      Binary messages and long-lived HTTP/2 connections make it fast for service-to-service traffic, and it supports streaming in both directions. Browsers can't call it directly without a proxy.
+    fun: It grew out of Stubby, a general-purpose RPC system Google had used internally since about 2001; Google decided to open-source its successor in 2015.
+    source: https://en.wikipedia.org/wiki/GRPC
+    stack: [grpc]
+    see: [RPC, Microservices]
+
+  - term: RPC
+    aka: Remote Procedure Call
+    short: Calling a function that runs on another machine as if it were a local call. The framework turns the call into a network message and the reply back into a return value.
+    detail: |
+      The catch is that networks fail in ways local calls don't: timeouts, partial failures, retries. Good RPC APIs make calls idempotent where they can.
+    fun: Bruce Jay Nelson is generally credited with coining the term "remote procedure call" in 1981.
+    source: https://en.wikipedia.org/wiki/Remote_procedure_call
+    stack: []
+    see: [gRPC, API, Idempotent]
+
+  - term: Webhook
+    short: A URL you give another service so it can call you with an HTTP request when something happens, instead of you polling it.
+    detail: |
+      Stripe posts to `/webhooks/stripe` when a payment succeeds; GitHub posts when someone pushes. Verify the signature, respond quickly, and handle the same event arriving twice.
+    fun: Jeff Lindsay coined the term in 2007, from the programming term "hook".
+    source: https://en.wikipedia.org/wiki/Webhook
+    stack: []
+    see: [API, Idempotent, Event-driven architecture]
+
+  - term: SDK
+    aka: Software Development Kit
+    short: A bundle of libraries, tools and docs for building on a platform, such as a client library that wraps an API so you call functions instead of writing raw HTTP requests.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/SDK
+    stack: []
+    see: [API]
+
+  - term: Microservices
+    short: An architecture where an application is split into small services, each running in its own process, owning its own data, and deployed independently.
+    detail: |
+      Teams can ship and scale services separately. The price is a distributed system: network calls that fail, data spread across databases, and much harder debugging and testing.
+    source: https://martinfowler.com/articles/microservices.html
+    stack: []
+    see: [Monolith, RPC, Message queue, Observability]
+
+  - term: Monolith
+    short: An application built and deployed as one unit, with all its features in a single codebase and process.
+    detail: |
+      Simple to develop, test and deploy early on, with in-process calls instead of network hops. It gets harder as the codebase and team grow, because every change ships everything.
+    source: https://en.wikipedia.org/wiki/Monolithic_application
+    stack: []
+    see: [Microservices]
+
+  - term: Serverless
+    short: A cloud model where you deploy functions or apps and the provider runs, scales and bills them per use, so you never manage the servers yourself.
+    detail: |
+      The name is a misnomer: the provider still runs servers, you just don't manage them. Expect limits on memory, CPU and run time, and lock-in to one provider's platform.
+    source: https://en.wikipedia.org/wiki/Serverless_computing
+    stack: []
+    see: [Stateless]
+
+  - term: Idempotent
+    short: An operation is idempotent if doing it once or many times leaves the system in the same state. Retrying it is safe.
+    detail: |
+      In HTTP, `GET`, `PUT` and `DELETE` are idempotent; `POST` is not. That matters for retries: resending a `DELETE` after a timeout is harmless, resending a `POST` may create a second order.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Idempotent
+    stack: []
+    see: [HTTP method, REST, Webhook]
+
+  - term: Rate limit
+    short: A cap on how many requests a client may make in a time window. Over the limit, a web API typically answers `429 Too Many Requests`.
+    detail: |
+      It protects a service from overload and abuse. A `Retry-After` header can tell the client how long to wait before trying again.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status/429
+    stack: []
+    see: [Status code, API, Load balancer]
+
+  - term: Pagination
+    short: Returning a long list in pages instead of all at once, so responses stay small and fast.
+    detail: |
+      With cursor paging (`?limit=20&starting_after=obj_123`) each request continues from the last item the client saw, and the response says whether there are more pages.
+    source: https://docs.stripe.com/api/pagination
+    stack: []
+    see: [API, Query string]
+
+  - term: Cache invalidation
+    short: Removing or updating cached copies when the original data changes, so nobody keeps reading stale values.
+    detail: |
+      Common approaches: expire entries after a TTL, delete the cache key when you write, or version the key so a change means a new key. Getting it wrong shows users old data.
+    source: https://en.wikipedia.org/wiki/Cache_invalidation
+    stack: []
+    see: [HTTP cache, CDN, TTL]
+
+  - term: Message queue
+    short: A buffer where one program puts messages and another takes them off later, so the sender doesn't wait for the receiver.
+    detail: |
+      Used for background jobs and smoothing traffic spikes: the web request enqueues "send email" and returns; a worker sends it. Plan for messages that are delivered more than once.
+    source: https://en.wikipedia.org/wiki/Message_queue
+    stack: []
+    see: [Pub/sub, Event-driven architecture, Idempotent]
+
+  - term: Pub/sub
+    aka: Publish/subscribe
+    short: A messaging pattern where publishers send messages to a topic and every subscriber to that topic gets a copy, without the two sides knowing about each other.
+    detail: |
+      With topic-based filtering, every subscriber to a topic receives all messages published to it. Adding a new consumer means subscribing, not changing the publisher.
+    source: https://en.wikipedia.org/wiki/Publish%E2%80%93subscribe_pattern
+    stack: []
+    see: [Message queue, Event-driven architecture]
+
+  - term: Event-driven architecture
+    short: A design where components react to events ("order placed", "user signed up") published by others, instead of calling each other directly.
+    detail: |
+      Services stay loosely coupled and new reactions are easy to add. The flow of a request becomes harder to follow, so tracing and clear event names matter.
+    source: https://en.wikipedia.org/wiki/Event-driven_architecture
+    stack: []
+    see: [Pub/sub, Message queue, Webhook]
+
+  - term: Stateless
+    short: A stateless protocol or service keeps no memory of earlier requests; each request carries everything needed to handle it.
+    detail: |
+      HTTP is stateless, which is why apps use cookies or tokens to say who you are on every request. Stateless servers are easy to scale: any instance can handle any request.
+    source: https://en.wikipedia.org/wiki/Stateless_protocol
+    stack: []
+    see: [HTTP, Cookie, Session, REST, Serverless]
+
+  - term: SLO
+    aka: Service Level Objective
+    short: A target for how well a service should behave, such as "99.9% of requests succeed" or "95% of requests finish under 300 ms", measured over a time window.
+    detail: |
+      An SLI (indicator) is the measurement, the SLO is the target for it, and an SLA (agreement) is a promise to customers with consequences, such as refunds, if it is missed.
+    source: https://sre.google/sre-book/service-level-objectives/
+    stack: []
+    see: [Observability]
+
+  - term: Observability
+    short: How well you can understand what a running system is doing from the outside, using the signals it emits, mainly logs, metrics and traces.
+    detail: |
+      Metrics tell you something is wrong, traces show which service in a request's path is slow, and logs explain what happened there. OpenTelemetry is the common standard for emitting them.
+    source: https://opentelemetry.io/docs/concepts/observability-primer/
+    stack: [opentelemetry]
+    see: [SLO, Microservices]
