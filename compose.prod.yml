@@ -1,62 +1,63 @@
-# Production stack for a single VPS: Postgres, the app, nginx with Let's Encrypt.
-# Usage is in docs/deploy.md. Reads secrets from .env.production (never committed).
+# Production on the VPS, next to the other apps. The host's nginx terminates TLS and
+# proxies ztarz.latesailor.dev to the app on 127.0.0.1:3020. Runbook: docs/deploy.md.
+#
+# Everything is read from .env in the checkout on the server (never committed), which
+# also sets COMPOSE_FILE=compose.prod.yml, so a plain `docker compose up -d` works there.
+
+name: ztarz
 
 services:
   db:
     image: postgres:18-alpine
+    container_name: ztarz-postgres
     restart: unless-stopped
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-ztarz}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.production}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-ztarz}
+    # Sized for a shared 1 GB VM: one user, and the app's pool needs far fewer than 100 connections.
+    command: ["postgres", "-c", "shared_buffers=32MB", "-c", "max_connections=20"]
+    mem_limit: 128m
     volumes:
       - pgdata:/var/lib/postgresql
+    # Loopback only: for backups and an SSH tunnel (creating the owner). Docker-published
+    # ports skip the host firewall, so never publish this on 0.0.0.0.
+    ports:
+      - "127.0.0.1:5435:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ztarz}"]
       interval: 5s
       retries: 10
-    # No published port: only the app can reach the database.
 
   app:
+    # On the VPS the image is pulled from GHCR, built by CI; locally `docker compose build`
+    # builds it under the same name. ZTARZ_TAG pins a commit: rolling back is setting it
+    # to an older SHA in .env and running `docker compose up -d`.
+    image: ghcr.io/sailmanseeulater/ztarz:${ZTARZ_TAG:-latest}
     build: { context: ., target: runner }
+    container_name: ztarz-app
     restart: unless-stopped
-    env_file: .env.production
+    env_file: .env
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-ztarz}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ztarz}
+      NODE_OPTIONS: --max-old-space-size=192
+    mem_limit: 256m
+    # Loopback only; nginx on the host is the way in.
+    ports:
+      - "127.0.0.1:3020:3000"
     depends_on:
       db: { condition: service_healthy }
 
-  # One-off commands: migrations and the owner account, e.g.
-  #   docker compose -f compose.prod.yml --env-file .env.production run --rm tools pnpm db:migrate
-  tools:
-    build: { context: ., target: tools }
-    env_file: .env.production
+  # Applies pending migrations with the same image the app runs. The deploy runs it before
+  # starting a new version: `docker compose run --rm migrate`.
+  migrate:
+    image: ghcr.io/sailmanseeulater/ztarz:${ZTARZ_TAG:-latest}
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-ztarz}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-ztarz}
+    command: ["node", "migrator/migrate.mjs"]
     depends_on:
       db: { condition: service_healthy }
     profiles: [tools]
 
-  nginx:
-    image: nginx:1.29-alpine
-    restart: unless-stopped
-    ports: ["80:80", "443:443"]
-    environment:
-      DOMAIN: ${DOMAIN:?set DOMAIN in .env.production}
-    volumes:
-      - ./deploy/nginx/ztarz.conf.template:/etc/nginx/templates/default.conf.template:ro
-      - letsencrypt:/etc/letsencrypt:ro
-      - acme:/var/www/certbot:ro
-    depends_on: [app]
-    # Reload every 6h so renewed certificates are picked up.
-    command: /bin/sh -c 'while :; do sleep 6h & wait $${!}; nginx -s reload; done & exec /docker-entrypoint.sh nginx -g "daemon off;"'
-
-  certbot:
-    image: certbot/certbot:v4.1.1
-    restart: unless-stopped
-    volumes:
-      - letsencrypt:/etc/letsencrypt
-      - acme:/var/www/certbot
-    # Renew through nginx's /.well-known/acme-challenge/ every 12h (a no-op until 30 days before expiry).
-    entrypoint: /bin/sh -c 'trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot --quiet; sleep 12h & wait $${!}; done'
-
 volumes:
   pgdata:
-  letsencrypt:
-  acme:

@@ -1,97 +1,112 @@
-# Deploying ztarz to a VPS (lab F8)
+# Deploying ztarz (lab F8)
 
-One server runs everything with Docker Compose: Postgres, the Next.js app, nginx in front with a Let's Encrypt certificate, and certbot renewing it.
+ztarz runs at **https://ztarz.latesailor.dev** on the shared Oracle VPS (`ssh oracle`), next to the other latesailor.dev apps. Every push to `main` that passes CI deploys itself.
 
 ```
-internet ──443──▶ nginx ──▶ app:3000 ──▶ db:5432
-            80 ──▶ nginx (ACME challenges, redirect to https)
+push to main ─▶ CI: lint, unit tests, build, e2e
+                 └─▶ build image ─▶ ghcr.io/sailmanseeulater/ztarz:<sha>
+                      └─▶ deploy: ssh to the VPS ─▶ git pull, pull image, migrate, restart, health check
+
+internet ─443─▶ nginx (host, certbot) ─▶ 127.0.0.1:3020 ztarz-app ─▶ ztarz-postgres
 ```
 
-Only nginx publishes ports. The database is reachable from the app container only.
+## How it fits on the server
 
-## You need
+- **Host nginx and certbot**, shared with the other sites. The site file is [`deploy/nginx/ztarz.latesailor.dev.conf`](../deploy/nginx/ztarz.latesailor.dev.conf); certbot added the 443 block and the http → https redirect on the server. Renewal is the server's `certbot.timer`.
+- **Two containers** from [`compose.prod.yml`](../compose.prod.yml): `ztarz-app` (capped at 256 MB) and `ztarz-postgres` (capped at 128 MB). Both publish only on 127.0.0.1: 3020 for the app, 5435 for the database.
+- **The VM has 1 GB of RAM**, so it never builds anything. GitHub builds the image; the VPS only pulls it.
+- **`~/ztarz` is a git checkout**, used for the compose file and scripts. Its `.env` (mode 600, never committed) holds the database password, the auth secret, and `ZTARZ_TAG`, the commit that's live. `COMPOSE_FILE=compose.prod.yml` is in there too, so plain `docker compose ...` works in `~/ztarz`.
 
-- A VPS with Docker Engine and the Compose plugin (Ubuntu 24.04 works). **2 GB RAM or more**, or add swap: `next build` runs on the server and needs memory.
-- A domain (or subdomain) with an **A record pointing at the server's IP**. Check with `dig +short ztarz.example.com`.
-- Ports 80 and 443 open in the firewall (`ufw allow 80,443/tcp`).
+## The deploy, step by step
 
-## First deploy
+The `image` and `deploy` jobs in [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) run only for pushes to `main`, after `check` and `e2e` pass.
+
+1. **image** builds the `runner` target and pushes `:latest` and `:<sha>` to GHCR.
+2. **deploy** SSHes in with the deploy key (host key pinned in [`deploy/ssh_host_ed25519_key.pub`](../deploy/ssh_host_ed25519_key.pub)), runs `git pull`, then [`deploy/remote-deploy.sh`](../deploy/remote-deploy.sh), which:
+   - logs in to GHCR with the run's own short-lived token (logged out at the end);
+   - writes `ZTARZ_TAG=<sha>` into `.env`;
+   - pulls the image, runs migrations with it (`docker compose run --rm migrate`), and restarts the app;
+   - fails the deploy unless the running container is that exact image **and** `/api/health` answers (which also checks the database), printing the app's logs if not.
+3. Finally the job checks `https://ztarz.latesailor.dev/api/health` from outside.
+
+Deploys queue rather than cancel each other, so one is never stopped halfway.
+
+## Repository secrets
+
+| Secret | Value |
+| --- | --- |
+| `VPS_HOST` | `146.235.217.254` |
+| `VPS_USER` | `ubuntu` |
+| `VPS_SSH_KEY` | private half of `~/.ssh/ztarz_deploy`, a key used only by this workflow |
+
+To create the key (once, on your machine):
 
 ```bash
-# 1. Get the code onto the server
-git clone <your repo url> ztarz && cd ztarz
-
-# 2. Secrets: fill in every value
-cp deploy/env.production.example .env.production
-nano .env.production
+ssh-keygen -t ed25519 -C "ztarz deploy" -f ~/.ssh/ztarz_deploy -N ""
+ssh oracle 'cat >> ~/.ssh/authorized_keys' < ~/.ssh/ztarz_deploy.pub
+gh secret set VPS_SSH_KEY -R SailmanSeeulater/ztarz < ~/.ssh/ztarz_deploy
+gh secret set VPS_HOST -R SailmanSeeulater/ztarz --body 146.235.217.254
+gh secret set VPS_USER -R SailmanSeeulater/ztarz --body ubuntu
 ```
 
-Generate the secrets with `openssl rand -base64 32` (auth) and `openssl rand -base64 24 | tr -d '/+='` (database), and put the database password in both `POSTGRES_PASSWORD` and `DATABASE_URL`.
+To revoke it, delete its line (comment `ztarz deploy`) from `~/.ssh/authorized_keys` on the server.
+
+## First-time setup (already done)
 
 ```bash
-# 3. Certificate (once). Uses port 80 directly, so run it before nginx starts.
-#    This accepts the Let's Encrypt Subscriber Agreement for your domain.
-./deploy/init-cert.sh
-
-# 4. Build, migrate, create your account
-docker compose -f compose.prod.yml --env-file .env.production build
-docker compose -f compose.prod.yml --env-file .env.production run --rm tools pnpm db:migrate
-docker compose -f compose.prod.yml --env-file .env.production run --rm tools pnpm owner:create
-
-# 5. Start everything
-docker compose -f compose.prod.yml --env-file .env.production up -d
+git clone https://github.com/SailmanSeeulater/ztarz.git ~/ztarz
+cd ~/ztarz && umask 077 && cp deploy/env.production.example .env   # then fill in the secrets
+sudo cp deploy/nginx/ztarz.latesailor.dev.conf /etc/nginx/sites-available/
+sudo ln -s /etc/nginx/sites-available/ztarz.latesailor.dev /etc/nginx/sites-enabled/
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d ztarz.latesailor.dev --redirect
 ```
 
-## Check it worked (the lab's pass criteria)
+DNS: an `A` record for `ztarz` pointing at the VPS, at Namecheap.
+
+## Creating your account
+
+Sign-up is off; the owner account is created once, from your machine, through an SSH tunnel to the production database:
 
 ```bash
-curl -sI https://ztarz.example.com | head -1          # HTTP/2 200 (or 307 to /sign-in)
-curl -s https://ztarz.example.com/api/health          # {"ok":true}
-curl -sI http://ztarz.example.com | grep -i location  # redirects to https://
-docker compose -f compose.prod.yml ps                 # app shows (healthy)
+ssh -N -L 5435:127.0.0.1:5435 oracle &
+DB_PASS=$(ssh oracle "grep ^POSTGRES_PASSWORD= ~/ztarz/.env | cut -d= -f2")
+DATABASE_URL="postgres://ztarz:$DB_PASS@localhost:5435/ztarz" \
+  OWNER_EMAIL=you@example.com OWNER_NAME="Your Name" OWNER_PASSWORD='choose-one' \
+  pnpm owner:create
+kill %1
 ```
 
-Then sign in and finish one session.
-
-## Updating
+## Everyday operations (on the server, in `~/ztarz`)
 
 ```bash
-git pull
-docker compose -f compose.prod.yml --env-file .env.production build app tools
-docker compose -f compose.prod.yml --env-file .env.production run --rm tools pnpm db:migrate
-docker compose -f compose.prod.yml --env-file .env.production up -d app
+docker compose ps                     # what's running, and its health
+docker compose logs --tail 100 app    # app logs
+docker compose up -d                  # restart at the tag in .env
 ```
 
-Migrations run before the new app starts, so they must be backwards compatible with the running version (expand, then contract).
+**Rollback:** set `ZTARZ_TAG` in `.env` to an earlier commit's SHA and run `docker compose up -d`. No rebuild: every deployed commit's image stays in GHCR. Migrations aren't rolled back, which is why they must be backwards compatible (expand, then contract).
 
-## Private cards
-
-`content/private/` is gitignored, so a fresh clone doesn't have it. To include your private cards, copy the folder up before building:
-
-```bash
-rsync -a content/private/ user@server:ztarz/content/private/
-```
-
-They're only shown in your signed-in session, never on the public library or card pages.
+**Re-run a deploy:** re-run the workflow's `deploy` job in GitHub Actions.
 
 ## Backups
 
-The database lives in the `pgdata` volume. A nightly dump, kept for two weeks:
+[`deploy/backup.sh`](../deploy/backup.sh) dumps the database to `~/backups/ztarz-<stamp>.sql.gz` nightly at 03:15 (cron), keeping 14 days, next to Mordi's backups. Restore:
 
 ```bash
-# crontab -e on the server
-0 3 * * * cd ~/ztarz && docker compose -f compose.prod.yml exec -T db pg_dump -U ztarz ztarz | gzip > ~/backups/ztarz-$(date +\%F).sql.gz && find ~/backups -name 'ztarz-*.sql.gz' -mtime +14 -delete
+gunzip -c ~/backups/ztarz-<stamp>.sql.gz | docker exec -i ztarz-postgres psql -U ztarz -d ztarz
 ```
 
-A backup you haven't restored isn't a backup. Practise once:
+A backup you haven't restored isn't a backup: practise once.
 
-```bash
-gunzip -c ~/backups/ztarz-YYYY-MM-DD.sql.gz | docker compose -f compose.prod.yml exec -T db psql -U ztarz -d ztarz
-```
+## Private cards
+
+The private deck is gitignored, so CI never sees it and production serves the public cards only. Building it into an image would put it in GHCR, so it stays out until there's a way to load it from a file on the server.
 
 ## Troubleshooting
 
-- **nginx won't start, "cannot load certificate"**: step 3 didn't succeed. Check DNS points at this server and port 80 is open, then rerun `./deploy/init-cert.sh`.
-- **Sign-in fails in production**: `BETTER_AUTH_URL` must be the exact public URL, including `https://`.
-- **"Today" starts at the wrong hour**: set `APP_TIMEZONE` to your IANA timezone.
-- **Build killed during `next build`**: out of memory. Add swap (`fallocate -l 2G /swapfile && chmod 600 /swapfile && mkswap /swapfile && swapon /swapfile`).
+- **502 from nginx:** the app isn't answering on 3020. `docker compose ps` and `docker compose logs app`.
+- **Deploy fails at "login":** the GHCR token is the run's own; re-run the job rather than the whole workflow if it took too long.
+- **Sign-in fails:** `BETTER_AUTH_URL` in `.env` must be exactly `https://ztarz.latesailor.dev`.
+- **"Today" starts at the wrong hour:** `APP_TIMEZONE` in `.env`.
+- **Out of memory:** `docker stats --no-stream`. The caps are in `compose.prod.yml`; the VM has 2 GB of swap.
