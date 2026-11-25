@@ -1,0 +1,216 @@
+terms:
+  - term: Compiler
+    short: A program that translates source code into another form, usually machine code or bytecode, before the program runs.
+    detail: |
+      C, Go and Rust compile to native machine code. Java compiles to bytecode for the JVM. TypeScript's compiler outputs JavaScript, which some call transpiling.
+    fun: Grace Hopper's team wrote the compiler for the A-0 language in 1952 and coined the word "compiler" to describe it.
+    source: https://en.wikipedia.org/wiki/Compiler
+    stack: []
+    see: [Interpreter, Runtime]
+
+  - term: Interpreter
+    short: A program that runs source code directly, statement by statement, instead of translating it to a machine-code file first.
+    detail: |
+      Python and Ruby are classic interpreted languages. In practice the line is blurry: CPython compiles to bytecode first, and JavaScript engines compile hot code just in time (JIT).
+    source: https://en.wikipedia.org/wiki/Interpreter_(computing)
+    stack: []
+    see: [Compiler, V8]
+
+  - term: Runtime
+    aka: Runtime environment
+    short: Everything a program needs around it while it runs, such as memory management, the standard library and access to the operating system.
+    detail: |
+      Node.js, Deno and Bun are JavaScript runtimes; the JVM is Java's. "Runtime error" uses the other meaning: an error that happens while the program runs, not when it compiles.
+    source: https://en.wikipedia.org/wiki/Runtime_system
+    stack: []
+    see: [Node.js, JVM, Garbage collection]
+
+  - term: JavaScript
+    aka: JS, ECMAScript
+    short: The programming language of the web. Every browser runs it, and runtimes like Node.js run it on servers too.
+    detail: |
+      It is dynamically typed, single-threaded with an event loop, and standardised as ECMAScript. Despite the name, it is unrelated to Java.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/JavaScript
+    stack: [javascript]
+    see: [TypeScript, Node.js, Event loop]
+
+  - term: TypeScript
+    short: JavaScript with static types added. A compiler checks the types and then strips them out, producing plain JavaScript.
+    detail: |
+      ```ts
+      function greet(name: string): string { return `Hi ${name}`; }
+      greet(42); // error before the code ever runs
+      ```
+      Types catch whole classes of bugs early and power editor autocomplete.
+    fun: Its designers include Anders Hejlsberg, who was also lead architect of C# and created Turbo Pascal.
+    source: https://en.wikipedia.org/wiki/TypeScript
+    stack: [typescript]
+    see: [JavaScript, Static typing]
+
+  - term: Node.js
+    short: A runtime that runs JavaScript outside the browser, on servers and on your machine. It uses Google's V8 engine and an event loop for non-blocking I/O.
+    detail: |
+      One process handles many connections at once because it doesn't sit waiting on network or disk; it registers a callback and moves on. CPU-heavy work, though, blocks everyone.
+    fun: Ryan Dahl created it, first releasing it in 2009. Its official mascot is Rocket Turtle.
+    source: https://en.wikipedia.org/wiki/Node.js
+    stack: [nodedotjs]
+    see: [V8, Event loop, npm]
+
+  - term: V8
+    short: Google's open-source JavaScript and WebAssembly engine. It powers Chrome, Node.js and Deno, compiling JavaScript to machine code as it runs.
+    fun: It was named after the V8 car engine. Its lead developer was Lars Bak.
+    source: https://en.wikipedia.org/wiki/V8_(JavaScript_engine)
+    stack: [v8]
+    see: [Node.js, JavaScript, WebAssembly]
+
+  - term: Python
+    short: A general-purpose language known for readable syntax and a huge ecosystem. Widely used for scripting, web back ends, data science and machine learning.
+    detail: |
+      It is dynamically typed, uses indentation for blocks, and the main implementation (CPython) is interpreted. Optional type hints can be checked by tools like mypy.
+    fun: Guido van Rossum was reading scripts of the 1970s BBC comedy "Monty Python's Flying Circus" when he started Python, and took the name from it.
+    source: https://docs.python.org/3/faq/general.html#why-is-it-called-python
+    stack: [python]
+    see: [Interpreter, Dynamic typing]
+
+  - term: Go
+    aka: Golang
+    short: A compiled, statically typed language from Google, designed for simple, fast network services. It has built-in concurrency with goroutines and channels.
+    detail: |
+      Go builds a single static binary, compiles quickly and has garbage collection. Much cloud tooling is written in it, including Docker and Kubernetes.
+    fun: Robert Griesemer, Rob Pike and Ken Thompson started sketching the language on a whiteboard on 21 September 2007.
+    source: https://go.dev/doc/faq#history
+    stack: [go]
+    see: [Compiler, Garbage collection]
+
+  - term: Rust
+    short: A compiled systems language that gives C-like speed with memory safety, checked at compile time by its ownership and borrowing rules instead of a garbage collector.
+    detail: |
+      The borrow checker rejects code that could cause use-after-free or data races. The learning curve is steep, but whole classes of crashes disappear.
+    fun: Graydon Hoare named it after rust fungi, which he described as "over-engineered for survival".
+    source: https://en.wikipedia.org/wiki/Rust_(programming_language)
+    stack: [rust]
+    see: [Compiler, Garbage collection]
+
+  - term: Java
+    short: A statically typed, object-oriented language that compiles to bytecode and runs on the Java Virtual Machine, so the same build runs on any OS with a JVM.
+    detail: |
+      Long a mainstay of enterprise back ends and Android. Spring Boot is its most common web framework.
+    fun: It was first called Oak, after a tree outside James Gosling's office, then renamed Java after Java coffee.
+    source: https://en.wikipedia.org/wiki/Java_(programming_language)
+    stack: [java]
+    see: [JVM, Static typing]
+
+  - term: JVM
+    aka: Java Virtual Machine
+    short: The runtime that executes Java bytecode. It handles memory, garbage collection and just-in-time compilation to machine code.
+    detail: |
+      Other languages compile to JVM bytecode too, including Kotlin, Scala and Clojure, so they can use Java libraries.
+    source: https://en.wikipedia.org/wiki/Java_virtual_machine
+    stack: [java]
+    see: [Java, Runtime, Garbage collection]
+
+  - term: Garbage collection
+    aka: GC
+    short: Automatic memory management. The runtime finds memory the program can no longer reach and frees it, so you don't call `free` yourself.
+    detail: |
+      JavaScript, Python, Java and Go all use it. The cost is CPU time and occasional pauses; you can still leak memory by keeping references you no longer need.
+    fun: John McCarthy invented it around 1959 to simplify memory management in Lisp.
+    source: https://en.wikipedia.org/wiki/Garbage_collection_(computer_science)
+    stack: []
+    see: [Runtime, Rust]
+
+  - term: Static typing
+    short: Variable types are known and checked before the program runs, so type mistakes fail at compile time instead of in production.
+    detail: |
+      Java, Go, Rust and TypeScript are statically typed. Type inference means you often don't have to write the types out.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Static_typing
+    stack: []
+    see: [Dynamic typing, TypeScript]
+
+  - term: Dynamic typing
+    short: Types belong to values, not variables, and are checked while the program runs. A variable can hold a number now and a string later.
+    detail: |
+      JavaScript and Python are dynamically typed. You write less ceremony, but a type mistake only shows up when that line actually runs.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Dynamic_typing
+    stack: []
+    see: [Static typing, Python]
+
+  - term: Package manager
+    short: A tool that downloads the libraries your project depends on, at the right versions, and keeps a record of them.
+    detail: |
+      Language ones include npm and pnpm (JavaScript), pip and uv (Python) and Cargo (Rust). OS ones include apt and Homebrew. A lockfile pins exact versions so every install is the same.
+    source: https://en.wikipedia.org/wiki/Package_manager
+    stack: []
+    see: [npm, Dependency]
+
+  - term: npm
+    short: The default package manager for Node.js, and the public registry of JavaScript packages it installs from.
+    detail: |
+      `package.json` lists your dependencies; `package-lock.json` records the exact versions installed. pnpm and Yarn are alternatives that use the same registry.
+    fun: It's widely read as "Node Package Manager", but officially npm is a recursive backronym for "npm is not an acronym".
+    source: https://en.wikipedia.org/wiki/Npm
+    stack: [npm]
+    see: [Package manager, Dependency, Node.js]
+
+  - term: Dependency
+    short: Someone else's code that your project needs in order to build or run, usually a package installed by a package manager.
+    detail: |
+      In `package.json`, `dependencies` are needed at runtime and `devDependencies` only while developing or building. Each one brings its own dependencies too, so the real tree is much bigger than your list.
+    source: https://docs.npmjs.com/specifying-dependencies-and-devdependencies-in-a-package-json-file
+    stack: [npm]
+    see: [Package manager, Semantic versioning]
+
+  - term: Library
+    short: Reusable code you call from your own program, such as a date or HTTP library. You stay in charge of the flow.
+    detail: |
+      The usual contrast with a framework: you call a library, but a framework calls you.
+    source: https://en.wikipedia.org/wiki/Library_(computing)
+    stack: []
+    see: [Framework, Standard library]
+
+  - term: Framework
+    short: A structure that runs your app and calls your code at set points, such as a route handler or a React component. It decides the overall flow.
+    detail: |
+      This is called inversion of control. Next.js, Django and Spring Boot are frameworks; you fill in the pieces they ask for and follow their conventions.
+    source: https://en.wikipedia.org/wiki/Software_framework
+    stack: []
+    see: [Library]
+
+  - term: Standard library
+    short: The library that ships with a language, available without installing anything, such as Python's `json` and `os` or Go's `net/http`.
+    detail: |
+      A strong standard library means fewer third-party dependencies to vet and update.
+    source: https://en.wikipedia.org/wiki/Standard_library
+    stack: []
+    see: [Library, Dependency]
+
+  - term: async/await
+    short: Syntax for writing asynchronous code that reads like ordinary step-by-step code. `await` pauses the function until a promise settles, without blocking the thread.
+    detail: |
+      ```js
+      async function load() {
+        const res = await fetch("/api/user");
+        return res.json();
+      }
+      ```
+      An `async` function always returns a promise. Errors are caught with ordinary `try`/`catch`.
+    source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/async_function
+    stack: [javascript]
+    see: [Event loop, JavaScript]
+
+  - term: Event loop
+    short: The loop at the heart of JavaScript runtimes. It runs one task at a time and, when the call stack is empty, picks the next callback whose I/O or timer is ready.
+    detail: |
+      This is how single-threaded JavaScript handles thousands of concurrent requests: slow work happens elsewhere, and only the callback runs on the main thread. A long synchronous loop blocks everything.
+    source: https://nodejs.org/en/learn/asynchronous-work/event-loop-timers-and-nexttick
+    stack: [nodedotjs]
+    see: [Node.js, async/await]
+
+  - term: WebAssembly
+    aka: Wasm
+    short: A compact binary format that browsers and other runtimes can run at near-native speed. Languages like C, C++ and Rust compile to it.
+    detail: |
+      It runs alongside JavaScript, not instead of it: JavaScript loads the module and calls its functions. Used for heavy work such as image editing, games and codecs in the browser.
+    source: https://developer.mozilla.org/en-US/docs/WebAssembly
+    stack: [webassembly]
+    see: [JavaScript, V8]

@@ -16,7 +16,13 @@ const BY_SLUG = new Map<string, SimpleIcon>(
 );
 
 /** Friendlier names for slugs that Simple Icons spells differently. */
-const ALIASES: Record<string, string> = { jwt: "jsonwebtokens", nextjs: "nextdotjs", node: "nodedotjs", bash: "gnubash" };
+const ALIASES: Record<string, string> = {
+  jwt: "jsonwebtokens",
+  nextjs: "nextdotjs",
+  node: "nodedotjs",
+  bash: "gnubash",
+  java: "openjdk",
+};
 
 /** Not in Simple Icons (removed at the owner's request, or never added): shown as a lettered tile. */
 const LETTERED: Record<string, { title: string; hex: string }> = {

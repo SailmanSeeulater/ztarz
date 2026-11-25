@@ -6,8 +6,8 @@
  */
 import { existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, relative, sep } from "node:path";
-import { CardError, parseCard, parseLab } from "../src/lib/content/parse";
-import type { Card, Lab } from "../src/lib/content/schema";
+import { CardError, slugify, parseCard, parseGlossary, parseLab, parseSolution } from "../src/lib/content/parse";
+import type { Card, GlossaryTerm, Lab, Solution } from "../src/lib/content/schema";
 
 const root = join(import.meta.dirname, "..");
 const outFile = join(root, "src", "generated", "cards.json");
@@ -51,6 +51,46 @@ if (existsSync(labsDir)) {
   }
 }
 
+// Glossary: content/glossary/<category>.yml, one list of terms per category.
+const glossaryDir = join(root, "content", "glossary");
+const glossary: GlossaryTerm[] = [];
+if (existsSync(glossaryDir)) {
+  for (const f of readdirSync(glossaryDir).filter((f) => f.endsWith(".yml")).sort()) {
+    try {
+      glossary.push(...parseGlossary(f.replace(/\.yml$/, ""), readFileSync(join(glossaryDir, f), "utf8")));
+    } catch (e) {
+      errors.push(e instanceof CardError ? e.message : `glossary ${f}: ${String(e)}`);
+    }
+  }
+  const seen = new Map<string, string>();
+  for (const t of glossary) {
+    if (seen.has(t.id)) errors.push(`glossary: "${t.term}" appears twice (${seen.get(t.id)} and ${t.category})`);
+    seen.set(t.id, t.category);
+  }
+  const ids = new Set(glossary.map((t) => t.id));
+  for (const t of glossary) {
+    const dangling = t.see.filter((s) => !ids.has(slugify(s)));
+    if (dangling.length) errors.push(`glossary: "${t.term}" refers to missing terms: ${dangling.join(", ")}`);
+  }
+  glossary.sort((a, b) => a.term.localeCompare(b.term, "en", { sensitivity: "base" }));
+}
+
+// LeetCode solutions: content/solutions/NNNN-slug.md
+const solutionsDir = join(root, "content", "solutions");
+const solutions: Solution[] = [];
+if (existsSync(solutionsDir)) {
+  for (const f of readdirSync(solutionsDir).filter((f) => f.endsWith(".md")).sort()) {
+    const id = f.replace(/\.md$/, "");
+    try {
+      const s = parseSolution(id, readFileSync(join(solutionsDir, f), "utf8"));
+      if (!id.startsWith(String(s.number).padStart(4, "0") + "-")) errors.push(`solution ${id}: file name must start with ${String(s.number).padStart(4, "0")}-`);
+      solutions.push(s);
+    } catch (e) {
+      errors.push(e instanceof CardError ? e.message : `solution ${id}: ${String(e)}`);
+    }
+  }
+}
+
 if (errors.length) {
   console.error(`✗ ${errors.length} invalid card(s):\n\n${errors.join("\n\n")}`);
   process.exit(1);
@@ -59,5 +99,9 @@ if (errors.length) {
 mkdirSync(join(root, "src", "generated"), { recursive: true });
 writeFileSync(outFile, JSON.stringify(cards, null, 2) + "\n");
 writeFileSync(join(root, "src", "generated", "labs.json"), JSON.stringify(labs, null, 2) + "\n");
+writeFileSync(join(root, "src", "generated", "glossary.json"), JSON.stringify(glossary, null, 2) + "\n");
+writeFileSync(join(root, "src", "generated", "solutions.json"), JSON.stringify(solutions, null, 2) + "\n");
 const priv = cards.filter((c) => c.id.startsWith("private/")).length;
-console.log(`✓ ${cards.length} cards (${priv} private), ${labs.length} labs → ${relative(root, outFile)}`);
+console.log(
+  `✓ ${cards.length} cards (${priv} private), ${labs.length} labs, ${glossary.length} glossary terms, ${solutions.length} solutions → ${relative(root, outFile)}`,
+);

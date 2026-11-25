@@ -1,0 +1,172 @@
+terms:
+  - term: AI
+    aka: Artificial intelligence
+    short: The field of building computer systems that do tasks we associate with human intelligence, such as understanding language, recognising images or making decisions.
+    detail: |
+      Today most practical AI is machine learning: systems that learn patterns from data rather than following hand-written rules.
+    fun: AI was founded as an academic field at a workshop at Dartmouth College in 1956, which is generally seen as its official birthdate.
+    source: https://en.wikipedia.org/wiki/Artificial_intelligence
+    stack: []
+    see: [Machine learning, LLM]
+
+  - term: Machine learning
+    aka: ML
+    short: Building systems that learn to do a task from examples in data, instead of being programmed with explicit rules for it.
+    detail: |
+      Show a model thousands of emails labelled spam or not, and it learns to label new ones. The output of the learning step is a trained model.
+    fun: The term was coined in 1959 by Arthur Samuel, an IBM employee who worked on computer gaming and AI.
+    source: https://en.wikipedia.org/wiki/Machine_learning
+    stack: []
+    see: [ML model, Training, Neural network]
+
+  - term: ML model
+    aka: Model
+    short: 'The thing machine learning produces: a function with learned parameters (weights) that takes an input and returns a prediction.'
+    detail: |
+      Training sets the parameters; inference uses them. "Claude" or "GPT" in everyday speech usually means a specific trained model.
+    source: https://developers.google.com/machine-learning/glossary#model
+    stack: []
+    see: [Training, Inference, Machine learning]
+
+  - term: Training
+    short: The process of adjusting a model's parameters, using lots of example data, until its predictions are good.
+    detail: |
+      Training a large model takes huge datasets and many GPUs for weeks; it happens once (or occasionally), not on every request.
+    source: https://developers.google.com/machine-learning/glossary#training
+    stack: []
+    see: [Inference, Fine-tuning, GPU]
+
+  - term: Inference
+    short: Using an already trained model to make predictions on new input. Every chat reply or API call to a model is inference.
+    detail: |
+      Training is the expensive one-off; inference is the per-request cost you pay at run time, which is why model APIs bill per token.
+    source: https://developers.google.com/machine-learning/glossary#inference
+    stack: []
+    see: [Training, ML model, Token (LLM)]
+
+  - term: Neural network
+    short: A model made of layers of simple connected units (artificial neurons), loosely inspired by the brain. Each connection has a weight that training adjusts.
+    detail: |
+      Data enters an input layer, passes through hidden layers, and comes out as a prediction. Stacking many hidden layers is what "deep" learning means.
+    source: https://en.wikipedia.org/wiki/Neural_network_(machine_learning)
+    stack: []
+    see: [Deep learning, Training]
+
+  - term: Deep learning
+    short: Machine learning with neural networks that have many layers, which can learn complex patterns straight from raw data like pixels, audio or text.
+    source: https://en.wikipedia.org/wiki/Deep_learning
+    stack: []
+    see: [Neural network, Transformer, GPU]
+
+  - term: LLM
+    aka: Large language model
+    short: A very large neural network trained on huge amounts of text to predict the next token. Claude and GPT are LLMs.
+    detail: |
+      Predicting the next token, repeated over and over, is enough to write, summarise, translate and code. Assistants are LLMs further fine-tuned to follow instructions helpfully.
+    source: https://platform.claude.com/docs/en/about-claude/glossary#llm
+    stack: [anthropic]
+    see: [Transformer, Token (LLM), Context window, Fine-tuning]
+
+  - term: Transformer
+    short: The neural network architecture behind modern LLMs. Its attention mechanism lets every token look at every other token in the input at once.
+    detail: |
+      Earlier language models read text one word at a time. Transformers process all tokens in parallel, which made training on huge datasets practical.
+    fun: It was proposed in the 2017 paper "Attention Is All You Need" by researchers at Google, originally to improve machine translation.
+    source: https://en.wikipedia.org/wiki/Transformer_(deep_learning)
+    stack: []
+    see: [LLM, Deep learning, Token (LLM)]
+
+  - term: Token (LLM)
+    short: The unit of text a language model reads and writes. A token can be a word, part of a word, a character or a byte.
+    detail: |
+      Context windows, rate limits and prices are all counted in tokens, not characters. The ratio of characters to tokens varies by model and language, so count with the provider's tokeniser.
+    source: https://platform.claude.com/docs/en/about-claude/glossary#tokens
+    stack: []
+    see: [Context window, LLM]
+
+  - term: Context window
+    short: How much text a language model can take into account at once, counted in tokens. It acts as the model's working memory for a request.
+    detail: |
+      It includes the system prompt, the whole conversation so far, any documents you paste, and the reply. What doesn't fit has to be dropped or summarised.
+    source: https://platform.claude.com/docs/en/about-claude/glossary#context-window
+    stack: []
+    see: [Token (LLM), RAG, Prompt]
+
+  - term: Embedding
+    short: A list of numbers (a vector) that represents the meaning of a piece of text, so texts with similar meanings get similar vectors.
+    detail: |
+      "How do I reset my password?" and "forgot login" land close together even with no words in common. That makes embeddings the basis of semantic search and RAG.
+    source: https://platform.claude.com/docs/en/build-with-claude/embeddings
+    stack: []
+    see: [Vector database, RAG]
+
+  - term: Vector database
+    short: A database that stores embeddings and finds the ones most similar to a query vector, usually with fast approximate nearest-neighbour search.
+    detail: |
+      A traditional database looks records up by exact match (`WHERE id = 7`); a vector database finds records semantically similar to the input.
+    source: https://en.wikipedia.org/wiki/Vector_database
+    stack: []
+    see: [Embedding, RAG]
+
+  - term: RAG
+    aka: Retrieval-augmented generation
+    short: Making an LLM answer from your documents by first retrieving the relevant passages and putting them in the prompt.
+    detail: |
+      Embed the question, look up similar chunks in a vector database, then ask the model to answer using only those chunks. It keeps answers current and checkable without retraining.
+    fun: The term was introduced in a 2020 paper that combined a language model with an external memory searched at inference time.
+    source: https://en.wikipedia.org/wiki/Retrieval-augmented_generation
+    stack: []
+    see: [Embedding, Vector database, Context window, Hallucination]
+
+  - term: Prompt
+    short: 'The input you give a language model: instructions, context and examples that steer what it produces.'
+    detail: |
+      Clear instructions, relevant context and a worked example usually beat clever wording. A system prompt sets the role and rules for a whole conversation.
+    source: https://developers.google.com/machine-learning/glossary#prompt
+    stack: []
+    see: [Context window, LLM]
+
+  - term: Fine-tuning
+    short: Further training an already trained model on extra, focused data so it picks up that data's patterns, style or skills.
+    detail: |
+      Try good prompts and RAG first: they're cheaper and easier to change. Fine-tune when you need a consistent behaviour or format that prompting can't reliably get.
+    source: https://platform.claude.com/docs/en/about-claude/glossary#fine-tuning
+    stack: []
+    see: [Training, Prompt, RAG]
+
+  - term: Hallucination
+    short: When an AI model states something false or made up as if it were fact, such as a fabricated citation.
+    detail: |
+      Models generate plausible-sounding text, not verified truth, so falsehoods can sit inside an otherwise good answer. Check facts that matter against a real source.
+    fun: The Cambridge Dictionary chose "hallucinate" as its word of the year for 2023, adding this AI sense.
+    source: https://en.wikipedia.org/wiki/Hallucination_(artificial_intelligence)
+    stack: []
+    see: [RAG, LLM]
+
+  - term: AI agent
+    short: A system where an LLM decides for itself which steps to take and which tools to call, in a loop, until a task is done.
+    detail: |
+      Anthropic contrasts *workflows*, where code fixes the sequence of LLM calls, with *agents*, where the model directs its own process. Start with the simplest one that works.
+    source: https://www.anthropic.com/research/building-effective-agents
+    stack: [anthropic]
+    see: [LLM, MCP]
+
+  - term: MCP
+    aka: Model Context Protocol
+    short: An open standard for connecting AI applications to external tools and data, such as files, databases or a calendar, through one common interface.
+    detail: |
+      Write an MCP server once for your system, and any MCP-capable client (Claude, an IDE, an agent) can use its tools without a custom integration.
+    fun: Its own docs describe it as "like a USB-C port for AI applications".
+    source: https://modelcontextprotocol.io/docs/getting-started/intro
+    stack: [modelcontextprotocol]
+    see: [AI agent, LLM]
+
+  - term: GPU
+    aka: Graphics processing unit
+    short: A processor with thousands of small cores built for doing many simple calculations at once. Made for graphics, now the workhorse for training and running AI models.
+    detail: |
+      Neural networks are mostly huge matrix multiplications, which split naturally into parallel work. That's why AI capacity is often measured in GPUs.
+    fun: Nvidia popularised the term in 1999, marketing its GeForce 256 as "the world's first GPU".
+    source: https://en.wikipedia.org/wiki/Graphics_processing_unit
+    stack: [nvidia]
+    see: [Training, Deep learning]

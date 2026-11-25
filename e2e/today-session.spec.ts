@@ -62,3 +62,52 @@ test("complete today's session", async ({ page }) => {
   await page.reload();
   await expect(page.getByRole("heading", { name: "All caught up" })).toBeVisible();
 });
+
+test("streak, notes and library navigation", async ({ page }) => {
+  test.setTimeout(60_000);
+  await signIn(page);
+  // The session above reviewed cards today, so the streak is lit.
+  await expect(page.getByText(/^1-day streak$/)).toBeVisible();
+
+  // Notes: create, write Markdown, see it rendered (and raw HTML neutralised), delete.
+  await page.getByRole("link", { name: "Notes" }).click();
+  await expect(page.getByText(/^0 of 15/)).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: "New note" }).click();
+  await expect(page).toHaveURL(/\/notes\/[0-9a-f-]{36}$/);
+  await page.getByLabel("Title").fill("Ports to remember");
+  await page.getByLabel("Note, in Markdown").fill("## Ports\n\n- **5432** Postgres\n\n<script>window.pwned=1</script>");
+  await expect(page.getByText("Saved")).toBeVisible({ timeout: 5_000 });
+  await page.getByRole("tab", { name: "preview" }).click();
+  await expect(page.getByRole("heading", { name: "Ports", level: 2 })).toBeVisible();
+  await expect(page.locator("strong", { hasText: "5432" })).toBeVisible();
+  await expect(page.getByText("<script>window.pwned=1</script>")).toBeVisible();
+  expect(await page.evaluate(() => (window as { pwned?: number }).pwned)).toBeUndefined();
+
+  await page.reload();
+  await expect(page.getByLabel("Title")).toHaveValue("Ports to remember");
+  await page.getByRole("button", { name: "Delete note" }).click();
+  await page.getByRole("button", { name: "Tap again to delete" }).click();
+  await expect(page).toHaveURL(/\/notes$/);
+  await expect(page.getByText(/^0 of 15/)).toBeVisible();
+
+  // Library: modules start closed and open one at a time; cards link to their neighbours.
+  await page.goto("/library");
+  const f1 = page.locator("details", { has: page.locator("#m-f1") });
+  await expect(f1).not.toHaveAttribute("open");
+  await page.locator("#m-f1").click();
+  await expect(f1).toHaveAttribute("open");
+  await expect(page.locator("details", { has: page.locator("#m-f2") })).not.toHaveAttribute("open");
+  await f1.getByRole("link").first().click();
+  await expect(page.getByText(/^Card 1 of \d+$/)).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.keyboard.press("ArrowRight");
+  await expect(page.getByText(/^Card 2 of \d+$/)).toBeVisible();
+
+  // Glossary and solutions render.
+  await page.goto("/library/glossary");
+  await page.getByLabel("Search the glossary").fill("dns");
+  await expect(page.getByRole("heading", { name: /^DNS/, level: 3 })).toBeVisible();
+  await page.goto("/library/solutions/0001-two-sum");
+  await expect(page.getByRole("heading", { name: /Two Sum/, level: 1 })).toBeVisible();
+});

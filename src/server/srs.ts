@@ -1,10 +1,11 @@
 import "server-only";
 import { randomInt } from "node:crypto";
-import { and, count, eq, gte } from "drizzle-orm";
+import { and, count, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { cardState, reviewLog } from "@/db/schema";
 import { allCards, getCard } from "@/lib/content";
-import { startOfDay, startOfTomorrow } from "@/lib/srs/day";
+import { appTimeZone, startOfDay, startOfTomorrow } from "@/lib/srs/day";
+import { buildStreak, dayKey } from "@/lib/streak";
 import {
   fromStored,
   getScheduler,
@@ -111,6 +112,17 @@ export async function getWeeklyReport(userId: string, now = new Date()) {
     db.select({ cardId: cardState.cardId, due: cardState.due }).from(cardState).where(eq(cardState.userId, userId)),
   ]);
   return buildWeeklyReport({ cards: allCards(), reviews, due, now });
+}
+
+/** The daily streak, from the distinct local days that have at least one review. */
+export async function getStreak(userId: string, now = new Date()) {
+  const timeZone = appTimeZone();
+  const day = sql<string>`to_char(${reviewLog.reviewedAt} at time zone ${timeZone}, 'YYYY-MM-DD')`;
+  const rows = await db.selectDistinct({ day }).from(reviewLog).where(eq(reviewLog.userId, userId));
+  return buildStreak(
+    rows.map((r) => r.day),
+    dayKey(now, timeZone),
+  );
 }
 
 export class UnknownCardError extends Error {}

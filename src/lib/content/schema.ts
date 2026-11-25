@@ -19,6 +19,22 @@ export const MODULES = {
   devops: "DevOps and servers",
   ai: "AI engineering",
   swe: "Software engineering",
+  os: "Operating systems",
+  net: "Networking",
+  math: "Maths for programmers",
+  embedded: "Embedded systems",
+  data: "Data science",
+  ml: "Machine learning",
+  llm: "How LLMs work",
+  python: "Python",
+  go: "Go",
+  rust: "Rust",
+  java: "Java",
+  node: "Node.js",
+  express: "Express",
+  react: "React",
+  nextjs: "Next.js",
+  springboot: "Spring Boot",
   leetcode: "LeetCode patterns",
   stack: "Stack nuance",
   interview: "Interview answers",
@@ -27,6 +43,16 @@ export const MODULES = {
 export type ModuleId = keyof typeof MODULES;
 
 export const FOUNDATIONS = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9", "f10", "f11"] as const;
+
+/** How the library and map group modules. Every module appears in exactly one group. */
+export const MODULE_GROUPS = [
+  { id: "foundations", title: "Foundations", modules: FOUNDATIONS },
+  { id: "roles", title: "Role tracks", modules: ["frontend", "backend", "fullstack", "devops", "ai", "swe"] },
+  { id: "cs", title: "Computer science", modules: ["os", "net", "math", "embedded", "data", "ml", "llm"] },
+  { id: "languages", title: "Languages", modules: ["python", "go", "rust", "java"] },
+  { id: "frameworks", title: "Frameworks and runtimes", modules: ["node", "express", "react", "nextjs", "springboot"] },
+  { id: "practice", title: "Interview practice", modules: ["leetcode", "stack", "interview"] },
+] as const satisfies readonly { id: string; title: string; modules: readonly ModuleId[] }[];
 
 /** Which foundations each role branch builds on (from the plan's curriculum map). */
 export const BRANCH_PREREQS = {
@@ -151,5 +177,84 @@ export type Lab = {
   source: string;
   stack: StackLogo[];
   checks: LabCheck[];
+  sections: { key: string; heading: string; html: string }[];
+};
+
+/* ---------- Glossary: short definitions of the terms every engineer meets ---------- */
+
+export const GLOSSARY_CATEGORIES = {
+  web: "The web and HTTP",
+  network: "Networking",
+  os: "Operating systems and Linux",
+  data: "Databases and data",
+  code: "Languages and runtimes",
+  tools: "Tools and workflow",
+  arch: "APIs and architecture",
+  security: "Security",
+  cs: "Computer science",
+  ai: "AI and machine learning",
+} as const;
+export type GlossaryCategory = keyof typeof GLOSSARY_CATEGORIES;
+
+export const glossaryTermSchema = z.object({
+  /** The term as people write it: "DNS", "Idempotent", "Node.js". */
+  term: z.string().min(1).max(60),
+  /** What an acronym stands for, or another name for it. */
+  aka: z.string().max(120).optional(),
+  /** One or two plain sentences (inline Markdown). */
+  short: z.string().min(10).max(400),
+  /** Optional longer explanation or example (Markdown). */
+  detail: z.string().max(1200).optional(),
+  /** Optional fun fact: history, naming, a surprising number. Must be backed by the source. */
+  fun: z.string().max(400).optional(),
+  source: z.url(),
+  stack: z.array(z.string()).default([]),
+  /** Related terms in this glossary, by `term`. */
+  see: z.array(z.string()).default([]),
+});
+export const glossaryFileSchema = z.object({ terms: z.array(glossaryTermSchema).min(1) });
+
+export type GlossaryTerm = {
+  id: string; // slug of the term, unique across the glossary
+  term: string;
+  aka?: string;
+  category: GlossaryCategory;
+  shortHtml: string;
+  detailHtml?: string;
+  funHtml?: string;
+  source: string;
+  stack: StackLogo[];
+  see: string[];
+};
+
+/* ---------- LeetCode solutions: worked walk-throughs, statement in our own words ---------- */
+
+/** `## Heading` sections every solution must have. */
+export const SOLUTION_SECTIONS = ["the-problem", "thinking-it-through", "solution", "complexity"];
+
+export const solutionFrontMatterSchema = z.object({
+  number: z.number().int().min(1),
+  title: z.string().min(1),
+  difficulty: z.enum(["Easy", "Medium", "Hard"]),
+  /** The problem page, https://leetcode.com/problems/<slug>/ */
+  source: z.url(),
+  patterns: z.array(z.string()).min(1),
+  structures: z.array(z.string()).default([]),
+  time: z.string().min(1),
+  space: z.string().min(1),
+  stack: z.array(z.string()).default([]),
+});
+
+export type Solution = {
+  id: string; // file slug, e.g. "0001-two-sum"
+  number: number;
+  title: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  source: string;
+  patterns: string[];
+  structures: string[];
+  time: string;
+  space: string;
+  stack: StackLogo[];
   sections: { key: string; heading: string; html: string }[];
 };

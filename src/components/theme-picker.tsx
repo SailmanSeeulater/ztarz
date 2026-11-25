@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useSyncExternalStore } from "react";
+import { Suspense, useSyncExternalStore } from "react";
 import { signOut } from "@/app/sign-in/actions";
 import { setSoundOn, soundOn } from "@/lib/sound";
 import { THEMES, THEME_STORAGE_KEY, applyTheme, type ThemeId } from "@/lib/themes";
@@ -40,7 +40,6 @@ const subscribeSound = (onChange: () => void) => {
 export function ThemePicker() {
   const active = useSyncExternalStore(subscribe, current, () => null);
   const sound = useSyncExternalStore(subscribeSound, soundOn, () => true);
-  const signedOutPage = usePathname() === "/sign-in";
   const groups = [
     { scheme: "dark", title: "Dark" },
     { scheme: "light", title: "Light" },
@@ -113,15 +112,23 @@ export function ThemePicker() {
               />
             </button>
           </label>
-          {!signedOutPage && (
-            <form action={signOut} className="border-t border-sep">
-              <button type="submit" className="w-full px-3.5 py-2.5 text-left text-bad hover:bg-group">
-                Sign out
-              </button>
-            </form>
-          )}
+          {/* Reads the URL, so it gets its own boundary rather than holding up the page shell. */}
+          <Suspense fallback={null}>
+            <SignOut />
+          </Suspense>
         </div>
       </div>
     </>
+  );
+}
+
+function SignOut() {
+  if (usePathname() === "/sign-in") return null;
+  return (
+    <form action={signOut} className="border-t border-sep">
+      <button type="submit" className="w-full px-3.5 py-2.5 text-left text-bad hover:bg-group">
+        Sign out
+      </button>
+    </form>
   );
 }

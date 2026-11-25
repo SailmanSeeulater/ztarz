@@ -162,6 +162,157 @@ const ART: Record<ModuleId, React.ReactNode> = {
     </>
   ),
   // LeetCode patterns: two pointers closing in on an array
+  // Operating systems: stacked layers, hardware at the bottom, apps on top, the kernel between
+  os: (
+    <>
+      <rect x="8" y="44" width="48" height="10" rx="3" />
+      <rect x="14" y="29" width="36" height="10" rx="3" />
+      <rect x="8" y="10" width="13" height="13" rx="3" />
+      <rect x="25.5" y="10" width="13" height="13" rx="3" />
+      <rect x="43" y="10" width="13" height="13" rx="3" />
+      <path d="M32 39v5M20 23v6M44 23v6" />
+    </>
+  ),
+  // Networking: three nodes joined in a small mesh
+  net: (
+    <>
+      <circle cx="32" cy="12" r="6" />
+      <circle cx="12" cy="50" r="6" />
+      <circle cx="52" cy="50" r="6" />
+      <path d="M29 17 15 45M35 17l14 28M18 50h28" />
+      <path d="M32 18v14M32 32 16 46M32 32l16 14" strokeDasharray="2 4" />
+    </>
+  ),
+  // Maths: a function curve over axes
+  math: (
+    <>
+      <path d="M10 54V10M10 54h44" />
+      <path d="M14 50c8-2 12-30 22-30s10 14 18 14" />
+      <path d="M44 12h10M49 7v10" />
+    </>
+  ),
+  // Embedded systems: a chip with pins
+  embedded: (
+    <>
+      <rect x="16" y="16" width="32" height="32" rx="4" />
+      <rect x="25" y="25" width="14" height="14" rx="2" />
+      <path d="M24 8v8M32 8v8M40 8v8M24 48v8M32 48v8M40 48v8M8 24h8M8 32h8M8 40h8M48 24h8M48 32h8M48 40h8" />
+    </>
+  ),
+  // Data science: a scatter plot with a trend line
+  data: (
+    <>
+      <path d="M10 54V10M10 54h44" />
+      <circle cx="20" cy="44" r="2.5" />
+      <circle cx="27" cy="38" r="2.5" />
+      <circle cx="33" cy="40" r="2.5" />
+      <circle cx="39" cy="28" r="2.5" />
+      <circle cx="47" cy="22" r="2.5" />
+      <path d="M16 48 52 16" strokeDasharray="3 4" />
+    </>
+  ),
+  // Machine learning: a tiny neural network
+  ml: (
+    <>
+      <circle cx="12" cy="20" r="4" />
+      <circle cx="12" cy="44" r="4" />
+      <circle cx="32" cy="12" r="4" />
+      <circle cx="32" cy="32" r="4" />
+      <circle cx="32" cy="52" r="4" />
+      <circle cx="52" cy="32" r="4" />
+      <path d="m16 20 12-7M16 21l12 10M16 42l12-9M16 45l12 6M16 22l13 27M16 43l13-28M36 13l13 16M36 32h12M36 51l13-16" />
+    </>
+  ),
+  // How LLMs work: tokens in a row, the next one being predicted
+  llm: (
+    <>
+      <rect x="6" y="26" width="12" height="12" rx="3" />
+      <rect x="21" y="26" width="12" height="12" rx="3" />
+      <rect x="36" y="26" width="12" height="12" rx="3" />
+      <rect x="51" y="26" width="8" height="12" rx="3" strokeDasharray="2 3" />
+      <path d="M12 26c0-12 30-12 30 0M27 26c0-8 15-8 15 0" />
+      <path d="M42 46v8M38 50h8" />
+    </>
+  ),
+  // Python: a snake-ish curve, a prompt at the end
+  python: (
+    <>
+      <path d="M12 44c0-10 8-12 14-12h12c6 0 14-2 14-12" />
+      <path d="M52 20c0-6-6-10-12-10" />
+      <circle cx="43" cy="15" r="1.5" />
+      <path d="M12 44c0 6 6 10 12 10h10" />
+      <path d="M42 48l6 6-6 6" />
+    </>
+  ),
+  // Go: a goroutine arrow fanning out into channels
+  go: (
+    <>
+      <path d="M8 32h18" />
+      <path d="M26 32c8 0 8-16 18-16h10M26 32h28M26 32c8 0 8 16 18 16h10" />
+      <path d="m50 12 4 4-4 4M50 28l4 4-4 4M50 44l4 4-4 4" />
+    </>
+  ),
+  // Rust: a gear (it's a cog in a lot of systems)
+  rust: (
+    <>
+      <circle cx="32" cy="32" r="14" />
+      <circle cx="32" cy="32" r="5" />
+      <path d="M32 8v8M32 48v8M8 32h8M48 32h8M15 15l6 6M43 43l6 6M15 49l6-6M43 21l6-6" />
+    </>
+  ),
+  // Java: a cup with steam
+  java: (
+    <>
+      <path d="M12 28h32v14c0 8-6 12-16 12s-16-4-16-12z" />
+      <path d="M44 32h4c4 0 6 3 6 6s-2 6-6 6h-5" />
+      <path d="M20 10c-3 4 3 6 0 10M30 8c-3 4 3 6 0 10M40 10c-3 4 3 6 0 10" />
+    </>
+  ),
+  // Node.js: a hexagon around an event loop
+  node: (
+    <>
+      <path d="M32 6 54 19v26L32 58 10 45V19z" />
+      <path d="M22 32a10 10 0 1 1 3 7" />
+      <path d="m21 35 1 5 5-2" />
+    </>
+  ),
+  // Express: a request passing through middleware into a handler
+  express: (
+    <>
+      <path d="M6 32h52" />
+      <rect x="16" y="20" width="6" height="24" rx="2" />
+      <rect x="29" y="20" width="6" height="24" rx="2" />
+      <rect x="42" y="16" width="14" height="32" rx="3" />
+      <path d="m8 28 4 4-4 4" />
+    </>
+  ),
+  // React: a component tree
+  react: (
+    <>
+      <rect x="24" y="6" width="16" height="12" rx="3" />
+      <rect x="8" y="30" width="16" height="12" rx="3" />
+      <rect x="40" y="30" width="16" height="12" rx="3" />
+      <rect x="40" y="48" width="16" height="10" rx="3" />
+      <path d="M32 18v6H16v6M32 24h16v6M48 42v6" />
+    </>
+  ),
+  // Next.js: a page split into server and client halves, with an arrow onward
+  nextjs: (
+    <>
+      <rect x="8" y="10" width="40" height="44" rx="4" />
+      <path d="M8 20h40M28 20v34" />
+      <path d="M14 28h8M14 34h8M34 28h8M34 34h6" />
+      <path d="m52 28 6 4-6 4" />
+    </>
+  ),
+  // Spring Boot: a leaf on a power button
+  springboot: (
+    <>
+      <path d="M20 18a18 18 0 1 0 24 0" />
+      <path d="M32 8v20" />
+      <path d="M38 44c-2-8 4-14 12-14 0 8-4 14-12 14zM38 44l6-8" />
+    </>
+  ),
   leetcode: (
     <>
       <rect x="6" y="26" width="52" height="12" rx="3" />

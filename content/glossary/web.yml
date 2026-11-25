@@ -1,0 +1,167 @@
+terms:
+  - term: URL
+    aka: Uniform Resource Locator
+    short: The address of something on the web, such as `https://example.com/docs?page=2`. It says which protocol to use, which host to ask and which resource you want.
+    detail: |
+      The parts are scheme (`https`), host (`example.com`), optional port, path (`/docs`), query (`?page=2`) and fragment (`#intro`). The fragment never reaches the server; the browser keeps it.
+    fun: Tim Berners-Lee later said the two slashes after `https:` were unnecessary, since the colon already ends the scheme.
+    source: https://en.wikipedia.org/wiki/URL
+    stack: []
+    see: [URI, Domain name, Query string]
+
+  - term: URI
+    aka: Uniform Resource Identifier
+    short: A string that identifies a resource. Every URL is a URI; a URI only becomes a URL when it also tells you how to fetch the thing.
+    detail: |
+      `mailto:someone@example.com` and `urn:isbn:0451450523` are URIs. In everyday web work people say URL and mean the same thing.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/URI
+    stack: []
+    see: [URL]
+
+  - term: Domain name
+    short: A human-readable name for a host on the internet, like `example.com`. DNS turns it into an IP address.
+    detail: |
+      Read it right to left. `.com` is the top-level domain, `example` is the registered name, and `api.example.com` is a subdomain the owner controls.
+    fun: The first commercial `.com` name, symbolics.com, was registered on 15 March 1985.
+    source: https://en.wikipedia.org/wiki/Domain_name
+    stack: []
+    see: [DNS, URL]
+
+  - term: HTTP
+    aka: Hypertext Transfer Protocol
+    short: The request-response protocol of the web. A client sends a method, a path and headers; the server sends back a status code, headers and usually a body.
+    detail: |
+      HTTP is stateless: each request stands alone, so anything that must persist between requests (a login, a cart) travels in cookies or tokens. HTTP/1.1 is text; HTTP/2 and HTTP/3 keep the same meaning but change the framing on the wire.
+    fun: The first version, later called HTTP/0.9, had a single-line request and only one method, `GET`.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Evolution_of_HTTP
+    stack: []
+    see: [HTTPS, HTTP method, Status code, HTTP header, Stateless]
+
+  - term: HTTPS
+    aka: HTTP Secure
+    short: HTTP sent inside a TLS connection. The traffic is encrypted, and the certificate proves you are talking to the real site.
+    detail: |
+      Default port 443 rather than 80. Browsers mark plain HTTP pages as not secure, and many features (service workers, geolocation) only work over HTTPS.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/HTTPS
+    stack: []
+    see: [HTTP, TLS, HSTS]
+
+  - term: HTTP method
+    aka: HTTP verb
+    short: The word at the start of a request that says what you want done. `GET` reads, `POST` creates or triggers, `PUT` replaces, `PATCH` partly updates, `DELETE` removes.
+    detail: |
+      `GET`, `HEAD`, `PUT` and `DELETE` are idempotent: sending the same request twice has the same effect as once. `POST` is not, which is why a double-clicked "Pay" button needs care. `GET` should never change data.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Methods
+    stack: []
+    see: [HTTP, Status code, Idempotent, REST]
+
+  - term: Status code
+    aka: HTTP response status code
+    short: The three-digit number at the top of every HTTP response. The first digit gives the class, 2xx success, 3xx redirect, 4xx the client's fault, 5xx the server's fault.
+    detail: |
+      Ones to know: `200` OK, `201` Created, `204` No Content, `301`/`302` redirects, `304` Not Modified, `400` Bad Request, `401`, `403` Forbidden, `404` Not Found, `429` Too Many Requests, `500` Internal Server Error, `502` Bad Gateway, `503` Service Unavailable.
+    fun: '`401 Unauthorized` is misnamed: it really means unauthenticated. "You are known but not allowed" is `403 Forbidden`.'
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Status
+    stack: []
+    see: [HTTP, Authentication, Authorisation]
+
+  - term: HTTP header
+    short: 'A `Name: value` line sent with a request or response that carries extra information, such as `Content-Type`, `Authorization` or `Cache-Control`.'
+    detail: |
+      Header names are case-insensitive. Request headers describe the client and what it wants; response headers describe the body and tell the browser how to cache, store cookies or apply security rules.
+    fun: The `Referer` header is a misspelling of "referrer", but it is in the standard that way, so it stays.
+    source: https://en.wikipedia.org/wiki/List_of_HTTP_header_fields
+    stack: []
+    see: [HTTP, Cookie, User agent]
+
+  - term: Cookie
+    aka: HTTP cookie
+    short: A small piece of data a server asks the browser to store and send back on later requests to the same site. It is how a stateless protocol remembers that you are logged in.
+    detail: |
+      Set with a `Set-Cookie` response header. For session cookies use `HttpOnly` (JavaScript cannot read it), `Secure` (HTTPS only) and `SameSite=Lax` or `Strict` (limits cross-site sending, which blunts CSRF).
+    fun: Netscape programmer Lou Montulli coined the name in 1994, borrowing "magic cookie", an older Unix term for data a program receives and hands back unchanged.
+    source: https://en.wikipedia.org/wiki/HTTP_cookie
+    stack: []
+    see: [Session, CSRF, HTTP header]
+
+  - term: Origin
+    short: The scheme, host and port of a URL taken together. `https://example.com` and `https://api.example.com` are different origins, and so are `http://` and `https://` versions of one site.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/Origin
+    stack: []
+    see: [Same-origin policy, CORS]
+
+  - term: Same-origin policy
+    short: The browser rule that a page's scripts may only read responses from their own origin. It stops a random site from reading your bank's pages using your cookies.
+    detail: |
+      It restricts reading, not sending: a form on another site can still POST to yours, which is why CSRF defences exist. CORS is the controlled way to relax the policy.
+    source: https://developer.mozilla.org/en-US/docs/Web/Security/Same-origin_policy
+    stack: []
+    see: [Origin, CORS, CSRF]
+
+  - term: CORS
+    aka: Cross-Origin Resource Sharing
+    short: A set of HTTP headers that lets a server say which other origins may read its responses in the browser, such as `Access-Control-Allow-Origin`.
+    detail: |
+      For non-simple requests (custom headers, `PUT`, JSON bodies) the browser first sends an `OPTIONS` preflight. CORS is enforced by the browser only; `curl` and server-to-server calls ignore it, so it is not an access-control system.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/CORS
+    stack: []
+    see: [Same-origin policy, Origin, HTTP header]
+
+  - term: HTTP cache
+    short: Stored copies of responses that the browser, a CDN or a proxy can reuse instead of asking the server again. The `Cache-Control` header decides who may cache and for how long.
+    detail: |
+      `max-age=3600` means fresh for an hour. After that the cache revalidates with `ETag` or `Last-Modified`, and the server can answer `304 Not Modified` with no body. `no-store` means never keep it.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Guides/Caching
+    stack: []
+    see: [CDN, HTTP header, Status code]
+
+  - term: CDN
+    aka: Content Delivery Network
+    short: A network of servers around the world that keep copies of your files close to users, so pages load faster and your own server does less work.
+    detail: |
+      Good for static assets (images, JS, CSS) with long cache lifetimes. Changing a file usually means a new file name (a hash in the name) or a cache purge.
+    source: https://developer.mozilla.org/en-US/docs/Glossary/CDN
+    stack: []
+    see: [HTTP cache, Latency, Reverse proxy]
+
+  - term: Browser
+    aka: Web browser
+    short: The program that fetches web pages over HTTP, then parses the HTML, applies the CSS and runs the JavaScript to show you the result.
+    fun: The first web browser, WorldWideWeb, was written by Tim Berners-Lee in 1990.
+    source: https://en.wikipedia.org/wiki/Web_browser
+    stack: []
+    see: [DOM, User agent, HTTP]
+
+  - term: DOM
+    aka: Document Object Model
+    short: The browser's live, in-memory tree of the page. JavaScript reads and changes the page through it, for example `document.querySelector("h1").textContent = "Hi"`.
+    detail: |
+      The DOM is not the HTML source: it is what the browser built from it, plus every change scripts have made since. Frameworks like React update the DOM for you.
+    source: https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
+    stack: []
+    see: [Browser]
+
+  - term: WebSocket
+    short: A long-lived, two-way connection between browser and server, opened by upgrading an HTTP request. Either side can send messages at any time, which suits chat, live dashboards and games.
+    detail: |
+      URLs use `ws://` or `wss://` (over TLS). Plain HTTP makes the client ask every time; a WebSocket lets the server push.
+    source: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
+    stack: []
+    see: [HTTP, TCP]
+
+  - term: User agent
+    short: The software acting for the user, usually the browser. It identifies itself in the `User-Agent` request header.
+    detail: |
+      Do not build features on User-Agent sniffing: the string is easy to fake and browsers are trimming it. Detect the feature instead.
+    fun: Almost every browser's User-Agent starts with `Mozilla/5.0`, a historical claim of being Mozilla-compatible, even when it is Chrome or Safari.
+    source: https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/User-Agent
+    stack: []
+    see: [Browser, HTTP header]
+
+  - term: Query string
+    short: The part of a URL after `?`, made of `key=value` pairs joined by `&`, as in `/search?q=dns&page=2`. It passes small inputs to the server.
+    detail: |
+      Special characters must be percent-encoded (a space becomes `%20`). Query strings end up in logs and browser history, so never put passwords or tokens in them.
+    source: https://en.wikipedia.org/wiki/Query_string
+    stack: []
+    see: [URL, HTTP method]

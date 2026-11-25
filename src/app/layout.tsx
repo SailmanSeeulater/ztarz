@@ -1,8 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemePicker } from "@/components/theme-picker";
-import { TopNav } from "@/components/top-nav";
+import { TopNav, TopNavView } from "@/components/top-nav";
 import { DEFAULT_DARK, THEME_SCRIPT } from "@/lib/themes";
 import "./globals.css";
 
@@ -39,7 +40,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
               ztarz
             </Link>
             <div className="flex items-center gap-1.5">
-              <TopNav />
+              {/* The nav reads the URL; its fallback is the same tabs with none selected. */}
+              <Suspense fallback={<TopNavView pathname={null} />}>
+                <TopNav />
+              </Suspense>
               <ThemePicker />
             </div>
           </div>
