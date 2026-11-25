@@ -304,7 +304,84 @@ textarea {
 .pass-enter {
   animation: pass-in 320ms var(--ease-out-expo);
 }
+
+/* ---------- View transitions (React <ViewTransition>, by transition type) ---------- */
+
+/* Clicks pass through to the live page while a transition plays. */
+::view-transition {
+  pointer-events: none;
+}
+
+/* Flip: the front turns away to edge-on, then the back turns in. The two halves never overlap. */
+::view-transition-group(.pass-flip) {
+  animation-duration: 460ms;
+  animation-timing-function: var(--ease-out-expo);
+}
+::view-transition-old(.pass-flip),
+::view-transition-new(.pass-flip) {
+  mix-blend-mode: normal;
+  backface-visibility: hidden;
+}
+::view-transition-old(.pass-flip) {
+  animation: flip-away 190ms cubic-bezier(0.55, 0, 1, 0.45) both;
+}
+::view-transition-new(.pass-flip) {
+  animation: flip-in 300ms var(--ease-out-expo) 190ms both;
+}
+@keyframes flip-away {
+  to {
+    transform: perspective(1600px) rotateY(-90deg);
+  }
+}
+@keyframes flip-in {
+  from {
+    transform: perspective(1600px) rotateY(90deg);
+  }
+}
+
+/* Deal: the answered pass lifts off the top, the next rises out of the stack below. */
+::view-transition-old(.pass-deal-out) {
+  animation: deal-out 220ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+::view-transition-new(.pass-deal-in) {
+  animation: deal-in 420ms var(--ease-out-expo) 120ms both;
+}
+@keyframes deal-out {
+  to {
+    transform: translateY(-2rem) scale(0.97);
+    opacity: 0;
+  }
+}
+@keyframes deal-in {
+  from {
+    transform: translateY(2.5rem) scale(0.95);
+    opacity: 0;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* No turning or travelling: the content swaps with a short crossfade instead. */
+  ::view-transition-group(*) {
+    animation-duration: 0s !important;
+  }
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: vt-fade-in 150ms both !important;
+    transform: none !important;
+  }
+  ::view-transition-old(*) {
+    animation-name: vt-fade-out !important;
+  }
+  @keyframes vt-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+  @keyframes vt-fade-out {
+    to {
+      opacity: 0;
+    }
+  }
   .pass-enter {
     animation: none;
   }

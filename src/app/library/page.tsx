@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { cardsByModule, publicCards } from "@/lib/content";
 import { ChevronRightIcon } from "@/components/icons";
-import { ModuleBadge, hueFor, moduleParts } from "@/components/pass";
+import { ModuleArt } from "@/components/module-art";
+import { hueFor, moduleParts } from "@/components/pass";
 import { TYPE_LABEL } from "@/components/type-label";
 
 export const metadata: Metadata = { title: "Library" };
@@ -21,10 +22,11 @@ export default function Library() {
         {groups.map(([moduleId, cards]) => (
           <section key={moduleId} aria-labelledby={`m-${moduleId}`}>
             <div className="flex items-center gap-2.5 px-1">
-              <span className="pass rounded-lg" data-hue={hueFor(moduleId)}>
-                <ModuleBadge id={moduleId} />
+              <span className="pass grid size-10 shrink-0 place-items-center rounded-xl" data-hue={hueFor(moduleId)}>
+                <ModuleArt id={moduleId} strokeWidth={2.75} className="size-7" />
               </span>
               <h2 id={`m-${moduleId}`} className="min-w-0 flex-1 truncate text-[1.0625rem] font-semibold">
+                <span className="mr-1.5 text-label-2">{moduleParts(moduleId).code}</span>
                 {moduleParts(moduleId).name}
               </h2>
               <span className="text-[0.8125rem] text-label-2 tabular-nums">{cards.length}</span>

@@ -1,4 +1,6 @@
+import { ViewTransition } from "react";
 import { MODULES, type ModuleId } from "@/lib/content/schema";
+import { PassEmboss } from "./module-art";
 
 const SHORT: Partial<Record<ModuleId, string>> = {
   frontend: "FE",
@@ -73,20 +75,24 @@ export function CardPass({
 }) {
   const { name } = moduleParts(module);
   return (
-    <section className={`pass ${className}`} data-hue={hueFor(module)}>
-      <header className="flex items-start justify-between gap-4 px-5 pt-4">
-        <div className="flex min-w-0 items-center gap-2.5">
-          <ModuleBadge id={module} />
-          <span className="truncate text-[0.9375rem] font-semibold">{name}</span>
-        </div>
-        {topRight}
-      </header>
-      <Title className="px-5 pt-6 text-[1.625rem] leading-[1.15] font-semibold tracking-[-0.015em] text-balance">
-        {title}
-      </Title>
-      {fields && <dl className="flex flex-wrap gap-x-7 gap-y-3 px-5 pt-4">{fields}</dl>}
-      {children && <div className="mt-5 border-t border-[var(--well-strong)] px-5 py-5">{children}</div>}
-      {footer && <div className="border-t border-[var(--well-strong)] px-5 py-3.5">{footer}</div>}
-    </section>
+    // Revealing an answer turns the pass over (a "flip" transition from CardView); nothing else animates here.
+    <ViewTransition update={{ flip: "pass-flip", default: "none" }} default="none">
+      <section className={`pass relative isolate ${className}`} data-hue={hueFor(module)}>
+        <PassEmboss id={module} className="top-14 -right-4 -z-10 size-32" />
+        <header className="flex items-start justify-between gap-4 px-5 pt-4">
+          <div className="flex min-w-0 items-center gap-2.5">
+            <ModuleBadge id={module} />
+            <span className="truncate text-[0.9375rem] font-semibold">{name}</span>
+          </div>
+          {topRight}
+        </header>
+        <Title className="px-5 pt-6 text-[1.625rem] leading-[1.15] font-semibold tracking-[-0.015em] text-balance">
+          {title}
+        </Title>
+        {fields && <dl className="flex flex-wrap gap-x-7 gap-y-3 px-5 pt-4">{fields}</dl>}
+        {children && <div className="mt-5 border-t border-[var(--well-strong)] px-5 py-5">{children}</div>}
+        {footer && <div className="border-t border-[var(--well-strong)] px-5 py-3.5">{footer}</div>}
+      </section>
+    </ViewTransition>
   );
 }

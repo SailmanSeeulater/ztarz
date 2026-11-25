@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { PassEmboss } from "@/components/module-art";
 import { Field, ModuleBadge, hueFor, moduleParts } from "@/components/pass";
 import { BRANCH_PREREQS, FOUNDATIONS, type ModuleId } from "@/lib/content/schema";
 import { getCurrentUser } from "@/lib/session";
@@ -97,8 +98,10 @@ function ModulePass({ id, p, children }: { id: ModuleId; p: ModuleProgress; chil
 
   return (
     <li>
-      <details className="pass" data-hue={hueFor(id)}>
+      <details className="pass relative isolate" data-hue={hueFor(id)}>
         <summary className="block rounded-[inherit]">
+          {/* Inside the summary: a closed <details> hides every other child. */}
+          <PassEmboss id={id} className="-top-4 right-24 -z-10 size-24 opacity-[0.12]!" />
           {/* The strip that stays visible in the stack */}
           <div className="flex h-[3.75rem] items-center gap-3 px-4">
             <ModuleBadge id={id} />

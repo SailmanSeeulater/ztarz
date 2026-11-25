@@ -1,7 +1,10 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { useSyncExternalStore } from "react";
-import { THEMES, THEME_STORAGE_KEY, type ThemeId } from "@/lib/themes";
+import { signOut } from "@/app/sign-in/actions";
+import { setSoundOn, soundOn } from "@/lib/sound";
+import { THEMES, THEME_STORAGE_KEY, applyTheme, type ThemeId } from "@/lib/themes";
 import { CheckIcon, PassesIcon } from "./icons";
 
 // The head script sets data-theme before paint; this reads it back and follows changes.
@@ -13,7 +16,7 @@ const subscribe = (onChange: () => void) => {
 const current = () => document.documentElement.getAttribute("data-theme");
 
 function choose(id: ThemeId) {
-  document.documentElement.setAttribute("data-theme", id);
+  applyTheme(id);
   try {
     localStorage.setItem(THEME_STORAGE_KEY, id);
   } catch {
@@ -21,9 +24,23 @@ function choose(id: ThemeId) {
   }
 }
 
-/** A button in the top bar that opens a popover of the ten themes, each drawn as a small pass. */
+const subscribeSound = (onChange: () => void) => {
+  window.addEventListener("ztarz-sound", onChange);
+  window.addEventListener("storage", onChange);
+  return () => {
+    window.removeEventListener("ztarz-sound", onChange);
+    window.removeEventListener("storage", onChange);
+  };
+};
+
+/**
+ * A button in the top bar that opens a popover of the ten themes, each drawn as a small pass,
+ * with the sound switch and sign out below them.
+ */
 export function ThemePicker() {
   const active = useSyncExternalStore(subscribe, current, () => null);
+  const sound = useSyncExternalStore(subscribeSound, soundOn, () => true);
+  const signedOutPage = usePathname() === "/sign-in";
   const groups = [
     { scheme: "dark", title: "Dark" },
     { scheme: "light", title: "Light" },
@@ -77,6 +94,33 @@ export function ThemePicker() {
             </div>
           </fieldset>
         ))}
+        <div className="mt-4 overflow-hidden rounded-xl bg-group-2 text-[0.9375rem]">
+          <label className="flex cursor-pointer items-center justify-between gap-3 px-3.5 py-2.5">
+            <span>Paper sounds</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={sound}
+              onClick={() => setSoundOn(!sound)}
+              className={`relative h-[1.625rem] w-[2.75rem] shrink-0 rounded-full transition-colors duration-200 ${
+                sound ? "bg-good" : "bg-sep"
+              }`}
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 size-[1.375rem] rounded-full bg-white shadow transition-transform duration-200 ease-[var(--ease-out-expo)] ${
+                  sound ? "translate-x-[1.125rem]" : ""
+                }`}
+              />
+            </button>
+          </label>
+          {!signedOutPage && (
+            <form action={signOut} className="border-t border-sep">
+              <button type="submit" className="w-full px-3.5 py-2.5 text-left text-bad hover:bg-group">
+                Sign out
+              </button>
+            </form>
+          )}
+        </div>
       </div>
     </>
   );

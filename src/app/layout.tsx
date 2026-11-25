@@ -12,6 +12,8 @@ const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"]
 export const metadata: Metadata = {
   title: { default: "ztarz", template: "%s · ztarz" },
   description: "A daily 20-minute gym for developers, with spaced repetition so nothing fades.",
+  // Added to the iOS home screen, it opens full screen under this name.
+  appleWebApp: { capable: true, title: "ztarz", statusBarStyle: "default" },
 };
 
 export const viewport: Viewport = {

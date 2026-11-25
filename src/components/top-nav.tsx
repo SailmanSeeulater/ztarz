@@ -12,6 +12,8 @@ const TABS = [
 /** iOS-style segmented control for the three sections. */
 export function TopNav() {
   const pathname = usePathname();
+  // Signed out, every tab but Library just leads back here.
+  if (pathname === "/sign-in") return null;
   return (
     <nav aria-label="Sections" className="flex rounded-[0.6rem] bg-group p-0.5 text-[0.8125rem] font-medium">
       {TABS.map((t) => {

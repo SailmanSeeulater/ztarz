@@ -1,7 +1,8 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { addTransitionType, startTransition, useMemo, useState } from "react";
 import type { Card, RenderedChoice } from "@/lib/content/schema";
+import { playFlip, playRight, playWrong } from "@/lib/sound";
 import { CheckIcon, CrossIcon } from "./icons";
 
 /** Deterministic shuffle (mulberry32), so server and client render the same order. */
@@ -65,9 +66,14 @@ export function CardView({
   const prompt = card.sections.find((s) => s.key === "prompt");
   const rest = card.sections.filter((s) => s.key !== "prompt");
   const done = choices ? picked !== null : revealed;
+  // The answer is on the back of the pass, so revealing it turns the pass over.
   const reveal = () => {
-    setRevealed(true);
-    onAnswered?.(null);
+    playFlip();
+    startTransition(() => {
+      addTransitionType("flip");
+      setRevealed(true);
+      onAnswered?.(null);
+    });
   };
 
   return (
@@ -96,6 +102,8 @@ export function CardView({
                   disabled={picked !== null}
                   data-state={state}
                   onClick={() => {
+                    if (c.correct) playRight();
+                    else playWrong();
                     setPicked(i);
                     onAnswered?.(c.correct);
                   }}

@@ -2,7 +2,17 @@
 
 import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  ViewTransition,
+  addTransitionType,
+  startTransition,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { playDeal } from "@/lib/sound";
 import type { RatingName } from "@/lib/srs/scheduler";
 import type { Slot } from "@/lib/srs/today";
 import type { TodaySession as Session } from "@/server/srs";
@@ -12,6 +22,11 @@ import { Field, CardPass, hueFor } from "./pass";
 import { TYPE_LABEL } from "./type-label";
 
 type Item = Session["items"][number] & { again?: boolean };
+type Stats = { answered: number; graded: number; correct: number; missed: number; results: ("kept" | "missed")[] };
+
+/** Enter and exit animations for passes, keyed by transition type; only a "deal" moves them. */
+const DEAL_IN = { deal: "pass-deal-in", default: "none" };
+const DEAL_OUT = { deal: "pass-deal-out", default: "none" };
 
 const SLOT_LABEL: Record<Slot, string> = {
   review: "Review",
@@ -31,7 +46,7 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
   const [turn, setTurn] = useState(0); // remounts the pass, including when a card comes back
   // Set when the card is answered; the same reviewId is reused if saving has to be retried.
   const [answer, setAnswer] = useState<{ correct: boolean | null; reviewId: string } | null>(null);
-  const [stats, setStats] = useState({ answered: 0, graded: 0, correct: 0, missed: 0 });
+  const [stats, setStats] = useState<Stats>({ answered: 0, graded: 0, correct: 0, missed: 0, results: [] });
   const shownAt = useRef(0);
 
   const item = queue[pos];
@@ -60,16 +75,22 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
         },
         {
           onSuccess: (res) => {
-            setStats((s) => ({
-              answered: s.answered + 1,
-              graded: s.graded + (answer.correct === null ? 0 : 1),
-              correct: s.correct + (answer.correct ? 1 : 0),
-              missed: s.missed + (rating === "again" ? 1 : 0),
-            }));
-            if (res.requeue) setQueue((q) => [...q, { ...item, preview: res.preview, again: true }]);
-            setPos((p) => p + 1);
-            setAnswer(null);
-            setTurn((t) => t + 1);
+            // "deal": the answered pass lifts away and the next one rises from the stack.
+            playDeal();
+            startTransition(() => {
+              addTransitionType("deal");
+              setStats((s) => ({
+                answered: s.answered + 1,
+                graded: s.graded + (answer.correct === null ? 0 : 1),
+                correct: s.correct + (answer.correct ? 1 : 0),
+                missed: s.missed + (rating === "again" ? 1 : 0),
+                results: [...s.results, rating === "again" ? "missed" : "kept"],
+              }));
+              if (res.requeue) setQueue((q) => [...q, { ...item, preview: res.preview, again: true }]);
+              setPos((p) => p + 1);
+              setAnswer(null);
+              setTurn((t) => t + 1);
+            });
             record.reset();
           },
         },
@@ -113,6 +134,7 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
             <Field label="Coming back soon">{stats.missed}</Field>
           </>
         }
+        barcode={stats.results}
       >
         See you tomorrow.
       </EndPass>
@@ -124,36 +146,37 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
   return (
     <div>
       <div className="relative">
-        <CardPass
-          key={turn}
-          className="pass-enter relative z-10"
-          module={item.card.module}
-          title={item.card.title}
-          topRight={
-            <dl>
-              <Field label="Card" align="end">
-                <span>
-                  {pos + 1} / {queue.length}
-                </span>
-              </Field>
-            </dl>
-          }
-          fields={
-            <>
-              <Field label="Slot">
-                {SLOT_LABEL[item.slot]}
-                {item.again && " · again"}
-              </Field>
-              <Field label="Type">{TYPE_LABEL[item.card.type]}</Field>
-            </>
-          }
-        >
-          <CardView
-            card={item.card}
-            seed={seed + turn}
-            onAnswered={(correct) => setAnswer({ correct, reviewId: crypto.randomUUID() })}
-          />
-        </CardPass>
+        <ViewTransition key={turn} enter={DEAL_IN} exit={DEAL_OUT} default="none">
+          <CardPass
+            className={`relative z-10 ${turn === 0 ? "pass-enter" : ""}`}
+            module={item.card.module}
+            title={item.card.title}
+            topRight={
+              <dl>
+                <Field label="Card" align="end">
+                  <span>
+                    {pos + 1} / {queue.length}
+                  </span>
+                </Field>
+              </dl>
+            }
+            fields={
+              <>
+                <Field label="Slot">
+                  {SLOT_LABEL[item.slot]}
+                  {item.again && " · again"}
+                </Field>
+                <Field label="Type">{TYPE_LABEL[item.card.type]}</Field>
+              </>
+            }
+          >
+            <CardView
+              card={item.card}
+              seed={seed + turn}
+              onAnswered={(correct) => setAnswer({ correct, reviewId: crypto.randomUUID() })}
+            />
+          </CardPass>
+        </ViewTransition>
 
         {/* The rest of today's queue, tucked under the open pass like a wallet's stack. */}
         <div aria-hidden className="relative -mt-3">
@@ -213,12 +236,49 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
 }
 
 /** The closing pass: same shape as a card, in the first pass colour. */
-function EndPass({ title, fields, children }: { title: string; fields?: React.ReactNode; children: React.ReactNode }) {
+function EndPass({
+  title,
+  fields,
+  barcode,
+  children,
+}: {
+  title: string;
+  fields?: React.ReactNode;
+  barcode?: Stats["results"];
+  children: React.ReactNode;
+}) {
   return (
-    <section className="pass pass-enter px-5 pt-5 pb-6">
-      <h2 className="text-[1.625rem] leading-tight font-semibold tracking-[-0.015em]">{title}</h2>
-      {fields && <dl className="mt-4 flex flex-wrap gap-x-7 gap-y-3">{fields}</dl>}
-      <p className="mt-5 border-t border-[var(--well-strong)] pt-4 text-[var(--ink-2)]">{children}</p>
-    </section>
+    <ViewTransition enter={DEAL_IN} default="none">
+      <section className="pass pass-enter px-5 pt-5 pb-6">
+        <h2 className="text-[1.625rem] leading-tight font-semibold tracking-[-0.015em]">{title}</h2>
+        {fields && <dl className="mt-4 flex flex-wrap gap-x-7 gap-y-3">{fields}</dl>}
+        <p className="mt-5 border-t border-[var(--well-strong)] pt-4 text-[var(--ink-2)]">{children}</p>
+        {barcode && barcode.length > 0 && <ResultsBarcode results={barcode} />}
+      </section>
+    </ViewTransition>
+  );
+}
+
+/**
+ * Where a Wallet pass has its barcode, today's answers in order: a full bar for each card you kept,
+ * a short one for each that comes back soon.
+ */
+function ResultsBarcode({ results }: { results: Stats["results"] }) {
+  const missed = results.filter((r) => r === "missed").length;
+  return (
+    <figure className="mx-auto mt-6 w-fit max-w-full rounded-xl bg-[var(--ink)] px-5 pt-4 pb-3 text-[var(--pass)]">
+      <div
+        role="img"
+        aria-label={`${results.length - missed} kept, ${missed} coming back soon, in the order you answered`}
+        className="flex h-14 items-end justify-center gap-[3px]"
+      >
+        {results.map((r, i) => (
+          <span key={i} className={`w-1 rounded-[1px] bg-current ${r === "missed" ? "h-[40%]" : "h-full"}`} />
+        ))}
+      </div>
+      <figcaption className="mt-2 text-center text-[0.6875rem] font-semibold tracking-[0.08em] tabular-nums uppercase">
+        {results.length - missed} kept · {missed} back soon
+      </figcaption>
+    </figure>
   );
 }
