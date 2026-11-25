@@ -15,8 +15,11 @@ export const MODULES = {
   f11: "F11 · Working with AI and people",
   frontend: "Frontend",
   backend: "Backend",
+  fullstack: "Full stack",
   devops: "DevOps and servers",
   ai: "AI engineering",
+  swe: "Software engineering",
+  leetcode: "LeetCode patterns",
   stack: "Stack nuance",
   interview: "Interview answers",
 } as const;
@@ -29,6 +32,7 @@ export const FOUNDATIONS = ["f1", "f2", "f3", "f4", "f5", "f6", "f7", "f8", "f9"
 export const BRANCH_PREREQS = {
   frontend: ["f1", "f4", "f7"],
   backend: ["f1", "f6", "f7"],
+  fullstack: ["f4", "f6", "f7"],
   devops: ["f2", "f8", "f10"],
   ai: ["f4", "f7", "f11"],
 } as const satisfies Partial<Record<ModuleId, readonly ModuleId[]>>;
