@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/route-handlers"
 tags: ["nextjs", "webhooks"]
+stack: ["nextdotjs"]
 choices:
   - text: "A Route Handler (`app/api/.../route.ts`)"
     correct: true

@@ -4,6 +4,7 @@ module: backend
 type: out-loud
 source: "https://nextjs.org/docs/app/guides/authentication"
 tags: ["nextjs", "auth", "security"]
+stack: ["nextdotjs"]
 ---
 
 ## Prompt

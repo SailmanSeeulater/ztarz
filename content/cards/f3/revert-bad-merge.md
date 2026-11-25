@@ -4,6 +4,7 @@ module: f3
 type: out-loud
 source: "https://git-scm.com/docs/git-revert"
 tags: ["git", "recovery"]
+stack: ["git"]
 ---
 
 ## Prompt

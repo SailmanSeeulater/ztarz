@@ -4,6 +4,7 @@ module: frontend
 type: what-prints
 source: "https://react.dev/learn/queueing-a-series-of-state-updates"
 tags: ["react", "state", "batching"]
+stack: ["react"]
 ---
 
 ## Prompt

@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/state-as-a-snapshot"
 tags: ["react", "state"]
+stack: ["react"]
 choices:
   - text: "`undefined`"
     why: "`count` still holds this render's value; nothing clears it."

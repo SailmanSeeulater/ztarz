@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/api-reference/file-conventions/route-groups"
 tags: ["nextjs", "routing"]
+stack: ["nextdotjs"]
 choices:
   - text: "`/(dashboard)/settings`"
     why: "Parentheses never appear in URLs."

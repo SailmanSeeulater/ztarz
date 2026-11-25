@@ -282,7 +282,8 @@ textarea {
   margin-top: 0.75rem;
 }
 @media (hover: hover) {
-  .pass-stack > li:has(> details:not([open])):hover {
+  .pass-stack > li:has(> details:not([open])):hover,
+  .pass-stack > li:has(> a):hover {
     transform: translateY(-0.375rem);
   }
 }

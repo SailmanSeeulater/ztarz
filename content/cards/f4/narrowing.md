@@ -4,6 +4,7 @@ module: f4
 type: concept
 source: "https://www.typescriptlang.org/docs/handbook/2/narrowing.html"
 tags: ["typescript", "types"]
+stack: ["typescript"]
 ---
 
 ## Prompt

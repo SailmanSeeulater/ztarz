@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://nextjs.org/docs/app/getting-started/fetching-data"
 tags: ["nextjs", "rsc", "data-fetching"]
+stack: ["nextdotjs"]
 ---
 
 ## Prompt

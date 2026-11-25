@@ -4,6 +4,7 @@ module: f4
 type: what-prints
 source: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach"
 tags: ["javascript", "async"]
+stack: ["javascript"]
 ---
 
 ## Prompt

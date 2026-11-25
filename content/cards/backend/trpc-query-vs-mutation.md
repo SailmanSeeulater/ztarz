@@ -4,6 +4,7 @@ module: backend
 type: mcq
 source: "https://trpc.io/docs/server/procedures"
 tags: ["trpc", "api"]
+stack: ["trpc"]
 choices:
   - text: "Queries run on the client"
     why: "Both run on the server; the client only calls them."

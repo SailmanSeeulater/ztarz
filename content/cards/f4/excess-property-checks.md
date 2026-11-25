@@ -4,6 +4,7 @@ module: f4
 type: mcq
 source: "https://www.typescriptlang.org/docs/handbook/2/objects.html"
 tags: ["typescript", "types"]
+stack: ["typescript"]
 choices:
   - text: "Both"
     why: "① is an error: \"Object literal may only specify known properties\"."

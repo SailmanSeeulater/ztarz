@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://nextjs.org/docs/messages/react-hydration-error"
 tags: ["nextjs", "hydration"]
+stack: ["nextdotjs", "react"]
 ---
 
 ## Prompt

@@ -4,6 +4,7 @@ module: f2
 type: mcq
 source: "https://man7.org/linux/man-pages/man1/bash.1.html#SHELL_GRAMMAR"
 tags: ["shell", "pipes"]
+stack: ["gnubash"]
 choices:
   - text: "grep starts before the build finishes"
     why: "Both run at once and grep reads data as it arrives; that's the point of a pipe."

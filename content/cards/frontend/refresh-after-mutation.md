@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/revalidating"
 tags: ["nextjs", "caching", "trpc"]
+stack: ["nextdotjs", "trpc"]
 choices:
   - text: "`revalidatePath` or `revalidateTag` (or `updateTag` in a Server Action)"
     correct: true

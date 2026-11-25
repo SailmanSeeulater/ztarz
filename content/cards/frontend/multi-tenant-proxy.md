@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/proxy"
 tags: ["nextjs", "multi-tenant", "proxy"]
+stack: ["nextdotjs"]
 choices:
   - text: "In `next.config` at build time"
     why: "Tenants are decided per request, not per build."

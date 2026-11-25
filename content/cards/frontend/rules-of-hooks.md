@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/rules/rules-of-hooks"
 tags: ["react", "hooks"]
+stack: ["react"]
 choices:
   - text: "React identifies hooks by the order they're called, which must be the same every render"
     correct: true

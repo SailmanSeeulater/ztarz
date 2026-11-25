@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://react.dev/reference/react/useMemo"
 tags: ["react", "performance"]
+stack: ["react"]
 ---
 
 ## Prompt

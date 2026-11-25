@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/rendering-lists"
 tags: ["react", "lists", "keys"]
+stack: ["react"]
 choices:
   - text: "`Math.random()`"
     why: "A new key every render remounts every item, losing state and focus."

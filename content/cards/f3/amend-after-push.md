@@ -4,6 +4,7 @@ module: f3
 type: what-prints
 source: "https://git-scm.com/docs/git-push"
 tags: ["git", "push"]
+stack: ["git"]
 ---
 
 ## Prompt

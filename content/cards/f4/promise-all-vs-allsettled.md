@@ -4,6 +4,7 @@ module: f4
 type: mcq
 source: "https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Promise/all"
 tags: ["javascript", "async", "promises"]
+stack: ["javascript"]
 choices:
   - text: "It waits for all three, then rejects"
     why: "Closer to `Promise.allSettled`, which waits for every promise and never rejects."

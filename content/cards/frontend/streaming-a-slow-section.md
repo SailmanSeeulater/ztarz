@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://nextjs.org/docs/app/getting-started/fetching-data"
 tags: ["nextjs", "suspense", "streaming"]
+stack: ["nextdotjs", "react"]
 ---
 
 ## Prompt

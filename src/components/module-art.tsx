@@ -1,4 +1,4 @@
-import type { ModuleId } from "@/lib/content/schema";
+import type { ModuleId, StackLogo } from "@/lib/content/schema";
 
 /**
  * One line drawing per module, on a 64-unit grid with round caps, in the pass's ink.
@@ -184,12 +184,23 @@ export function ModuleArt({
 
 /**
  * The module's drawing pressed into the pass, like an emboss: big, faint, clipped by the pass's
- * corner. Sits behind the content and never takes clicks.
+ * corner. A card about a specific technology shows that technology's logo instead, so the
+ * lesson and the tool stick together. Sits behind the content and never takes clicks.
  */
-export function PassEmboss({ id, className = "" }: { id: ModuleId; className?: string }) {
+export function PassEmboss({ id, logo, className = "" }: { id: ModuleId; logo?: StackLogo; className?: string }) {
   return (
     <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-[inherit]">
-      <ModuleArt id={id} strokeWidth={1.25} className={`absolute text-[var(--ink)] opacity-[0.16] ${className}`} />
+      {logo?.path ? (
+        <svg
+          viewBox="0 0 24 24"
+          fill="currentColor"
+          className={`absolute p-[6%] text-[var(--ink)] opacity-[0.11] ${className}`}
+        >
+          <path d={logo.path} />
+        </svg>
+      ) : (
+        <ModuleArt id={id} strokeWidth={1.25} className={`absolute text-[var(--ink)] opacity-[0.16] ${className}`} />
+      )}
     </div>
   );
 }

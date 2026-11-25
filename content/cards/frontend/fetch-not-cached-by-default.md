@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/caching"
 tags: ["nextjs", "caching"]
+stack: ["nextdotjs"]
 choices:
   - text: "Yes, forever"
     why: "That was Next 14's default, and the reason it changed."

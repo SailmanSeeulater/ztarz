@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/server-and-client-components"
 tags: ["nextjs", "rsc", "hydration"]
+stack: ["nextdotjs", "react"]
 choices:
   - text: "Only in the browser"
     why: "It's prerendered to HTML on the server too."

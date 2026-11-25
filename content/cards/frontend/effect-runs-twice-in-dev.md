@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://react.dev/reference/react/StrictMode"
 tags: ["react", "useEffect", "strict-mode"]
+stack: ["react"]
 ---
 
 ## Prompt

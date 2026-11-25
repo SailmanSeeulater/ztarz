@@ -4,6 +4,7 @@ module: f7
 type: out-loud
 source: "https://trpc.io/docs/concepts"
 tags: ["trpc", "rest", "tradeoffs"]
+stack: ["trpc"]
 ---
 
 ## Prompt

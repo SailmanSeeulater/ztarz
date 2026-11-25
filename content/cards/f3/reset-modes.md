@@ -4,6 +4,7 @@ module: f3
 type: mcq
 source: "https://git-scm.com/docs/git-reset"
 tags: ["git", "reset"]
+stack: ["git"]
 choices:
   - text: "`git reset HEAD~1`"
     why: "The default, `--mixed`, keeps the changes but unstages them."

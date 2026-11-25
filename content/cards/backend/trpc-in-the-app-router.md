@@ -4,6 +4,7 @@ module: backend
 type: out-loud
 source: "https://trpc.io/docs/client/tanstack-react-query/server-components"
 tags: ["trpc", "nextjs", "tanstack-query"]
+stack: ["trpc", "nextdotjs"]
 ---
 
 ## Prompt

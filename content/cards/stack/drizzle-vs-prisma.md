@@ -4,6 +4,7 @@ module: stack
 type: comparison
 source: https://orm.drizzle.team/docs/column-types/pg
 tags: [orm, migrations, typescript, f6]
+stack: [drizzle, prisma]
 ---
 
 ## What it is

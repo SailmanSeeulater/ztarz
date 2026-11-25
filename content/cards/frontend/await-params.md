@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/api-reference/file-conventions/page"
 tags: ["nextjs", "routing"]
+stack: ["nextdotjs"]
 choices:
   - text: "`const { id } = await params`"
     correct: true

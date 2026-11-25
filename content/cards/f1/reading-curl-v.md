@@ -4,6 +4,7 @@ module: f1
 type: what-prints
 source: "https://curl.se/docs/manpage.html#-v"
 tags: ["http", "curl", "debugging"]
+stack: ["curl"]
 ---
 
 ## Prompt

@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: https://nextjs.org/docs/app/getting-started/caching
 tags: [rendering, nextjs, ssg, ssr]
+stack: [nextdotjs]
 choices:
   - text: "**SSG**: prerender it at build time"
     correct: true

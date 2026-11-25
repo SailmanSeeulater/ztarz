@@ -4,6 +4,7 @@ module: f4
 type: mcq
 source: "https://www.typescriptlang.org/docs/handbook/2/narrowing.html#discriminated-unions"
 tags: ["typescript", "state"]
+stack: ["typescript"]
 choices:
   - text: "A string message"
     why: "Loses the data and makes every check a string comparison."

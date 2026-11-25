@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://nextjs.org/docs/app/guides/forms"
 tags: ["nextjs", "forms", "server-actions"]
+stack: ["nextdotjs"]
 ---
 
 ## Prompt

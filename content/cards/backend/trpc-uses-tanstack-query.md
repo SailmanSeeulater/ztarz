@@ -4,6 +4,7 @@ module: backend
 type: mcq
 source: "https://trpc.io/docs/client/tanstack-react-query/setup"
 tags: ["trpc", "tanstack-query"]
+stack: ["trpc"]
 choices:
   - text: "Redux"
     why: "Redux isn't involved."

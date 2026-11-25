@@ -4,6 +4,7 @@ module: f3
 type: mcq
 source: "https://git-scm.com/docs/git-rebase"
 tags: ["git", "rebase", "conflicts"]
+stack: ["git"]
 choices:
   - text: "Yours, from the feature branch"
     why: "That's true in `git merge main`, not in a rebase."

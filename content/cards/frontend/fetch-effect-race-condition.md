@@ -4,6 +4,7 @@ module: frontend
 type: bug-hunt
 source: https://react.dev/learn/synchronizing-with-effects#fetching-data
 tags: [react, useEffect, race-condition, data-fetching]
+stack: [react]
 choices:
   - text: "The response for an *older* `userId` can arrive last and `setUser` overwrites the newer one. Fix: set an `ignore` flag in the effect's cleanup and skip `setUser` when it's true."
     correct: true

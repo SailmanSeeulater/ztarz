@@ -4,6 +4,7 @@ module: backend
 type: mcq
 source: "https://trpc.io/docs/server/context"
 tags: ["trpc", "multi-tenant", "security"]
+stack: ["trpc"]
 choices:
   - text: "In `localStorage`"
     why: "Client storage is fully under the user's control."

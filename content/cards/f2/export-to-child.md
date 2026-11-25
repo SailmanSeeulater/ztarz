@@ -4,6 +4,7 @@ module: f2
 type: what-prints
 source: "https://man7.org/linux/man-pages/man1/bash.1.html#ENVIRONMENT"
 tags: ["shell", "env-vars"]
+stack: ["gnubash"]
 ---
 
 ## Prompt

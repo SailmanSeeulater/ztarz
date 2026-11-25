@@ -4,6 +4,7 @@ module: f3
 type: mcq
 source: "https://git-scm.com/book/en/v2/Git-Branching-Rebasing"
 tags: ["git", "rebase"]
+stack: ["git"]
 choices:
   - text: "When it causes conflicts"
     why: "Rebase handles conflicts: resolve, `git add`, then `git rebase --continue`."

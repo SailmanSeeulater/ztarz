@@ -79,6 +79,8 @@ const base = {
    *  `notes:<file>` (your own notes) is allowed only for private cards. */
   source: z.union([z.url(), z.string().regex(/^notes:.+/, "must be a URL or notes:<file>")]),
   tags: z.array(z.string()).default([]),
+  /** Technologies the card is about, as Simple Icons slugs ("docker", "postgresql"); shown as logos. */
+  stack: z.array(z.string()).default([]),
 };
 
 export const frontMatterSchema = z.discriminatedUnion("type", [
@@ -95,6 +97,9 @@ export type CardType = FrontMatter["type"];
 
 export type RenderedChoice = { html: string; correct: boolean; whyHtml: string };
 
+/** A technology's logo: an SVG path on a 24-unit grid, or no path for a lettered tile. */
+export type StackLogo = { slug: string; title: string; hex: string; path?: string };
+
 /** What the build script emits per card and the app reads. */
 export type Card = {
   id: string; // file slug relative to content/cards, e.g. "frontend/stale-closure-interval"
@@ -103,7 +108,44 @@ export type Card = {
   type: CardType;
   source: string;
   tags: string[];
+  stack: StackLogo[];
   /** Section slug → rendered HTML, in file order. */
   sections: { key: string; heading: string; html: string }[];
   choices?: RenderedChoice[];
+};
+
+/* ---------- Labs: hands-on tasks checked against the output you paste back ---------- */
+
+/** `## Heading` sections every lab must have. */
+export const LAB_SECTIONS = ["goal", "steps", "evidence"];
+
+const labCheck = z.object({
+  /** What passing this check proves, shown next to its result. */
+  label: z.string().min(1),
+  /** A regular expression (case-insensitive, multiline) the pasted output must match. */
+  pattern: z.string().min(1),
+  /** Match exactly this many times, e.g. 1 for "processed once, not twice". */
+  times: z.number().int().min(0).optional(),
+});
+
+export const labFrontMatterSchema = z.object({
+  title: z.string().min(1),
+  module: moduleId,
+  minutes: z.number().int().min(5).max(180),
+  source: z.url(),
+  stack: z.array(z.string()).default([]),
+  checks: z.array(labCheck).min(1),
+});
+
+export type LabCheck = z.infer<typeof labCheck>;
+
+export type Lab = {
+  id: string; // file slug relative to content/labs, e.g. "f1-trace-a-request"
+  title: string;
+  module: ModuleId;
+  minutes: number;
+  source: string;
+  stack: StackLogo[];
+  checks: LabCheck[];
+  sections: { key: string; heading: string; html: string }[];
 };

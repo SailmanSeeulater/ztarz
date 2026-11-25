@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/getting-started/server-and-client-components"
 tags: ["nextjs", "rsc", "composition"]
+stack: ["nextdotjs", "react"]
 choices:
   - text: "Yes, by importing it directly"
     why: "An import from a client file makes that module client code too."

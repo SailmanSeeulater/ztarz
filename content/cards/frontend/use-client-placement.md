@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://nextjs.org/docs/app/api-reference/directives/use-client"
 tags: ["nextjs", "rsc", "bundle-size"]
+stack: ["nextdotjs", "react"]
 choices:
   - text: "On the smallest interactive piece, as low in the tree as possible"
     correct: true

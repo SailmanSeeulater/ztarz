@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/learn/react-compiler"
 tags: ["react", "performance"]
+stack: ["react"]
 choices:
   - text: "Compiles JSX to WebAssembly"
     why: "Its output is still JavaScript."

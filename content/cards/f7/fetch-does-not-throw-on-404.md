@@ -4,6 +4,7 @@ module: f7
 type: mcq
 source: "https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API/Using_Fetch"
 tags: ["fetch", "http", "errors"]
+stack: ["javascript"]
 choices:
   - text: "The promise resolves normally, so you must check `res.ok`"
     correct: true

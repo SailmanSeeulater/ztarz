@@ -151,6 +151,7 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
             className={`relative z-10 ${turn === 0 ? "pass-enter" : ""}`}
             module={item.card.module}
             title={item.card.title}
+            stack={item.card.stack}
             topRight={
               <dl>
                 <Field label="Card" align="end">

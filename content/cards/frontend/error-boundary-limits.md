@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react/Component#catching-rendering-errors-with-an-error-boundary"
 tags: ["react", "errors"]
+stack: ["react"]
 choices:
   - text: "Errors in event handlers and async code"
     correct: true

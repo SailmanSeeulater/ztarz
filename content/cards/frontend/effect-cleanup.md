@@ -4,6 +4,7 @@ module: frontend
 type: concept
 source: https://react.dev/reference/react/useEffect
 tags: [react, useEffect]
+stack: [react]
 ---
 
 ## Prompt

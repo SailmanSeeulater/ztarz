@@ -4,6 +4,7 @@ module: frontend
 type: out-loud
 source: "https://react.dev/learn/synchronizing-with-effects#fetching-data"
 tags: ["react", "useEffect", "race-condition"]
+stack: ["react"]
 ---
 
 ## Prompt

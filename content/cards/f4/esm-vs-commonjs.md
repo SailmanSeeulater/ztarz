@@ -4,6 +4,7 @@ module: f4
 type: concept
 source: "https://nodejs.org/api/esm.html"
 tags: ["javascript", "node", "modules"]
+stack: ["nodedotjs", "javascript"]
 ---
 
 ## Prompt

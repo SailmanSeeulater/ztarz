@@ -4,6 +4,7 @@ module: frontend
 type: bug-hunt
 source: "https://nextjs.org/docs/messages/react-hydration-error"
 tags: ["nextjs", "hydration"]
+stack: ["nextdotjs", "react"]
 choices:
   - text: "The time differs between the server render and the first client render"
     correct: true

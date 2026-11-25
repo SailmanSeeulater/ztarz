@@ -4,6 +4,7 @@ module: frontend
 type: mcq
 source: "https://react.dev/reference/react-dom/components/input"
 tags: ["react", "forms"]
+stack: ["react"]
 choices:
   - text: "One inside a `<form>`"
     why: "Being in a form doesn't change who owns the value."
