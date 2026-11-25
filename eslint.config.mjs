@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Third-party agent skill (bundled, minified scripts)
+    ".claude/**",
+    // Playwright output
+    "test-results/**",
+    "playwright-report/**",
   ]),
 ]);
 

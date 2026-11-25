@@ -37,7 +37,7 @@ test("complete today's session", async ({ page }) => {
       await expect(verdict).toBeVisible();
       if ((await verdict.textContent()) === "Not quite.") {
         // After answering, the right choice is highlighted; its text finds it again next time.
-        const right = page.locator("ol > li > button.border-good .card-md").first();
+        const right = page.locator("ol > li > button[data-state='right'] .card-md").first();
         learned.set(name, (await right.textContent())!.trim());
         await page.getByRole("button", { name: /^Continue/ }).click();
       } else {
@@ -55,6 +55,8 @@ test("complete today's session", async ({ page }) => {
   }
 
   expect(answered).toBeGreaterThanOrEqual(3);
+  // The closing pass shows today's answers as a barcode.
+  await expect(page.getByRole("img", { name: /^\d+ kept, \d+ coming back soon/ })).toBeVisible();
 
   // Every answer was saved: after a reload there's nothing left for today.
   await page.reload();
