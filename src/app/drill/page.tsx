@@ -9,6 +9,7 @@ import { allCards } from "@/lib/content";
 import { MODULES, type ModuleId } from "@/lib/content/schema";
 import { getCurrentUser } from "@/lib/session";
 import { seededShuffle } from "@/lib/shuffle";
+import { TRPCReactProvider } from "@/trpc/client";
 import { getCaller } from "@/trpc/server";
 
 export const metadata: Metadata = { title: "Drill" };
@@ -59,7 +60,15 @@ async function Drill({ searchParams }: { searchParams: PageProps<"/drill">["sear
             {moduleId ? "No cards here yet." : "Nothing missed in the last two weeks. Pick a module in the library to drill instead."}
           </p>
         ) : (
-          <DrillSession key={seed} cards={cards} seed={seed} againHref={moduleId ? `/drill?m=${moduleId}` : "/drill"} />
+          <TRPCReactProvider>
+            <DrillSession
+              key={seed}
+              cards={cards}
+              seed={seed}
+              module={moduleId}
+              againHref={moduleId ? `/drill?m=${moduleId}` : "/drill"}
+            />
+          </TRPCReactProvider>
         )}
       </div>
     </>

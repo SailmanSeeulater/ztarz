@@ -1,9 +1,11 @@
 "use client";
 
+import { useMutation } from "@tanstack/react-query";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import type { Card } from "@/lib/content/schema";
 import { playDeal, playRight, playWrong } from "@/lib/sound";
+import { useTRPC } from "@/trpc/client";
 import { CardView } from "./card-view";
 import { CardPass, Field } from "./pass";
 import { TYPE_LABEL } from "./type-label";
@@ -14,7 +16,20 @@ type Result = { card: Card; knew: boolean };
  * A practice run: answer, see how you did, move on. Nothing is recorded, so drilling a card
  * here never changes when your daily session shows it next.
  */
-export function DrillSession({ cards, seed, againHref }: { cards: Card[]; seed: number; againHref: string }) {
+export function DrillSession({
+  cards,
+  seed,
+  againHref,
+  module,
+}: {
+  cards: Card[];
+  seed: number;
+  againHref: string;
+  /** The module being drilled, or null for the missed-lately pile; only used for the activity log. */
+  module: string | null;
+}) {
+  const trpc = useTRPC();
+  const { mutate: logFinished } = useMutation(trpc.activity.drillFinished.mutationOptions());
   const [pos, setPos] = useState(0);
   // undefined: not answered; boolean: auto-graded; null: revealed, waiting for "did you know it?"
   const [answer, setAnswer] = useState<boolean | null | undefined>(undefined);
@@ -23,7 +38,9 @@ export function DrillSession({ cards, seed, againHref }: { cards: Card[]; seed: 
 
   const next = (knew: boolean) => {
     playDeal();
-    setResults((r) => [...r, { card, knew }]);
+    const all = [...results, { card, knew }];
+    if (all.length === cards.length) logFinished({ module, total: all.length, knew: all.filter((r) => r.knew).length });
+    setResults(all);
     setAnswer(undefined);
     setPos((p) => p + 1);
   };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "@tanstack/react-query";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { MODULE_GROUPS, type ModuleId } from "@/lib/content/schema";
 import { MAX_NEW_PER_DAY, type Prefs } from "@/lib/prefs";
 import { useTRPC } from "@/trpc/client";
@@ -15,9 +15,15 @@ export function FocusEditor({ initial, unseen }: { initial: Prefs; unseen: Parti
   const save = useMutation(trpc.prefs.set.mutationOptions());
   const [prefs, setPrefs] = useState(initial);
 
+  const [dirty, setDirty] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
+
+  // Saves a moment after the last tap, so picking five modules is one save (and one log line).
   const change = (next: Prefs) => {
     setPrefs(next);
-    save.mutate(next);
+    setDirty(true);
+    clearTimeout(timer.current);
+    timer.current = setTimeout(() => save.mutate(next, { onSettled: () => setDirty(false) }), 600);
   };
   const toggle = (id: ModuleId) =>
     change({ ...prefs, focus: prefs.focus.includes(id) ? prefs.focus.filter((m) => m !== id) : [...prefs.focus, id] });
@@ -72,7 +78,7 @@ export function FocusEditor({ initial, unseen }: { initial: Prefs; unseen: Parti
             : `${prefs.focus.length} in focus · ${left} new cards left${days ? ` · about ${days} days` : ""}`}
         </p>
         <span className="flex shrink-0 items-center gap-3">
-          {save.isError ? <span className="text-bad">Couldn&apos;t save</span> : save.isPending ? "Saving…" : save.isSuccess ? "Saved" : null}
+          {save.isError ? <span className="text-bad">Couldn&apos;t save</span> : dirty || save.isPending ? "Saving…" : save.isSuccess ? "Saved" : null}
           {prefs.focus.length > 0 && (
             <button type="button" onClick={() => change({ ...prefs, focus: [] })} className="text-tint hover:opacity-80">
               Clear

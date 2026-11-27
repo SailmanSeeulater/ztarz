@@ -35,15 +35,18 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       </head>
       <body className="flex min-h-full flex-col font-sans">
         <header className="sticky top-0 z-20 border-b border-sep/60 bg-bg/80 backdrop-blur-xl">
-          <div className="mx-auto flex max-w-2xl items-center justify-between gap-3 px-4 py-2.5">
+          {/* Phones: logo and theme on one row, the tabs on a full-width row below. Wider: one row. */}
+          <div className="mx-auto flex max-w-2xl flex-wrap items-center gap-x-3 gap-y-2 px-4 py-2.5">
             <Link href="/" className="text-[1.0625rem] font-bold tracking-tight">
               ztarz
             </Link>
-            <div className="flex items-center gap-1.5">
+            <div className="order-last w-full sm:order-none sm:ml-auto sm:w-auto">
               {/* The nav reads the URL; its fallback is the same tabs with none selected. */}
               <Suspense fallback={<TopNavView pathname={null} />}>
                 <TopNav />
               </Suspense>
+            </div>
+            <div className="ml-auto sm:ml-0">
               <ThemePicker />
             </div>
           </div>

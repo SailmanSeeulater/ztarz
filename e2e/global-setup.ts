@@ -19,7 +19,7 @@ export default async function globalSetup() {
 
   const db = postgres(E2E_DATABASE_URL, { onnotice: () => {} });
   try {
-    await db`truncate review_log, card_state, lab_attempt, note, user_pref`;
+    await db`truncate review_log, card_state, lab_attempt, note, user_pref, activity, exam_attempt`;
   } finally {
     await db.end();
   }

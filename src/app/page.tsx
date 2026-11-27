@@ -16,8 +16,8 @@ export default function TodayPage() {
     <div>
       <div className="flex items-baseline justify-between gap-4">
         <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Today</h1>
-        <Link href="/week" className="inline-flex items-center text-[0.9375rem] text-tint hover:opacity-80">
-          This week
+        <Link href="/progress" className="inline-flex items-center text-[0.9375rem] text-tint hover:opacity-80">
+          Progress
           <ChevronRightIcon className="size-4" />
         </Link>
       </div>

@@ -16,6 +16,7 @@ import {
   type RatingName,
 } from "@/lib/srs/scheduler";
 import { planToday } from "@/lib/srs/today";
+import { buildAnalytics } from "@/lib/analytics";
 import { buildWeeklyReport } from "@/lib/report";
 
 /** A card answered again within this window comes back in the same session. */
@@ -131,6 +132,31 @@ export async function getWeeklyReport(userId: string, now = new Date()) {
     db.select({ cardId: cardState.cardId, due: cardState.due }).from(cardState).where(eq(cardState.userId, userId)),
   ]);
   return buildWeeklyReport({ cards: allCards(), reviews, due, now });
+}
+
+/** Everything the Progress page charts, from the whole review history. */
+export async function getAnalytics(userId: string, now = new Date()) {
+  const [reviews, states] = await Promise.all([
+    db
+      .select({ cardId: reviewLog.cardId, rating: reviewLog.rating, reviewedAt: reviewLog.reviewedAt, durationMs: reviewLog.durationMs })
+      .from(reviewLog)
+      .where(eq(reviewLog.userId, userId)),
+    db
+      .select({ cardId: cardState.cardId, due: cardState.due, lastReview: cardState.lastReview, state: cardState.state })
+      .from(cardState)
+      .where(eq(cardState.userId, userId)),
+  ]);
+  return buildAnalytics({
+    cards: allCards(),
+    reviews,
+    states: states.map((r) => ({
+      cardId: r.cardId,
+      due: r.due,
+      mature: r.state === "review" && !!r.lastReview && r.due.getTime() - r.lastReview.getTime() >= MATURE_MS,
+    })),
+    now,
+    timeZone: appTimeZone(),
+  });
 }
 
 /** The daily streak, from the distinct local days that have at least one review. */
