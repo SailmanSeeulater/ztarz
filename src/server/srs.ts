@@ -2,7 +2,8 @@ import "server-only";
 import { randomInt } from "node:crypto";
 import { and, count, eq, gte, sql } from "drizzle-orm";
 import { db } from "@/db";
-import { cardState, reviewLog } from "@/db/schema";
+import { cardState, reviewLog, userPref } from "@/db/schema";
+import { DEFAULT_PREFS, validFocus, type Prefs } from "@/lib/prefs";
 import { allCards, getCard } from "@/lib/content";
 import { appTimeZone, startOfDay, startOfTomorrow } from "@/lib/srs/day";
 import { buildStreak, dayKey } from "@/lib/streak";
@@ -20,9 +21,24 @@ import { buildWeeklyReport } from "@/lib/report";
 /** A card answered again within this window comes back in the same session. */
 const REQUEUE_WITHIN_MS = 30 * 60_000;
 
+export async function getPrefs(userId: string): Promise<Prefs> {
+  const [row] = await db.select().from(userPref).where(eq(userPref.userId, userId));
+  return row ? { newPerDay: row.newPerDay, focus: validFocus(row.focus) } : DEFAULT_PREFS;
+}
+
+export async function savePrefs(userId: string, prefs: Prefs) {
+  const values = { newPerDay: prefs.newPerDay, focus: prefs.focus as string[], updatedAt: new Date() };
+  await db
+    .insert(userPref)
+    .values({ userId, ...values })
+    .onConflictDoUpdate({ target: userPref.userId, set: values });
+  return prefs;
+}
+
 export async function getTodaySession(userId: string, now = new Date()) {
   const dayStart = startOfDay(now);
-  const [rows, [introduced], reviewed] = await Promise.all([
+  const [prefs, rows, [introduced], reviewed] = await Promise.all([
+    getPrefs(userId),
     db
       .select({
         cardId: cardState.cardId,
@@ -53,6 +69,8 @@ export async function getTodaySession(userId: string, now = new Date()) {
     dueBy: startOfTomorrow(now),
     introducedToday: introduced.n,
     reviewedToday: new Set(reviewed.map((r) => r.cardId)),
+    newPerDay: prefs.newPerDay,
+    focus: new Set(prefs.focus),
   });
 
   const scheduler = await getScheduler();
@@ -69,6 +87,7 @@ export async function getTodaySession(userId: string, now = new Date()) {
     items,
     seed: randomInt(2 ** 31), // shuffles choices this session; server-chosen so hydration matches
     totals: { cards: allCards().length, seen: allCards().filter((c) => seen.has(c.id)).length },
+    prefs,
   };
 }
 
@@ -123,6 +142,23 @@ export async function getStreak(userId: string, now = new Date()) {
     rows.map((r) => r.day),
     dayKey(now, timeZone),
   );
+}
+
+/** Cards rated "again" in the last `days` days, most misses first: the pile worth drilling. */
+export async function getMissedCards(userId: string, { days = 14, limit = 12 } = {}, now = new Date()) {
+  const since = new Date(now.getTime() - days * 86_400_000);
+  const rows = await db
+    .select({ cardId: reviewLog.cardId, missed: count() })
+    .from(reviewLog)
+    .where(and(eq(reviewLog.userId, userId), eq(reviewLog.rating, "again"), gte(reviewLog.reviewedAt, since)))
+    .groupBy(reviewLog.cardId);
+  return rows
+    .flatMap((r) => {
+      const card = getCard(r.cardId);
+      return card ? [{ card, missed: r.missed }] : [];
+    })
+    .sort((a, b) => b.missed - a.missed || a.card.id.localeCompare(b.card.id))
+    .slice(0, limit);
 }
 
 export class UnknownCardError extends Error {}

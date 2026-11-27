@@ -17,6 +17,11 @@ export type PlanInput = {
   reviewedToday?: Set<string>;
   newPerDay?: number;
   maxReviews?: number;
+  /**
+   * Modules to draw new material from. Empty or missing means everything, in curriculum order.
+   * Reviews ignore this: a card you've started always comes back when it's due.
+   */
+  focus?: ReadonlySet<string>;
 };
 
 const DRILL: CardType[] = ["what-prints", "bug-hunt"];
@@ -43,6 +48,7 @@ export function planToday({
   reviewedToday = new Set(),
   newPerDay = 5,
   maxReviews = 40,
+  focus,
 }: PlanInput): PlannedItem[] {
   const ordered = [...cards].sort(byCurriculum);
   const queued = new Set<string>();
@@ -61,17 +67,21 @@ export function planToday({
     .slice(0, maxReviews)
     .forEach((c) => add(c.id, "review"));
 
+  const focused = focus && focus.size > 0 ? focus : null;
+  const inFocus = (c: Card) => !focused || focused.has(c.module);
+
   const budget = Math.max(0, newPerDay - introducedToday);
-  ordered
-    .filter((c) => !states.has(c.id) && NEW_TYPES.includes(c.type))
-    .slice(0, budget)
-    .forEach((c) => add(c.id, "new"));
+  const unseenNew = ordered.filter((c) => !states.has(c.id) && NEW_TYPES.includes(c.type) && inFocus(c));
+  // With a focus, take turns between the chosen modules so today mixes them (interleaving);
+  // without one, walk the curriculum front to back.
+  (focused ? roundRobin(unseenNew, (c) => c.module) : unseenNew).slice(0, budget).forEach((c) => add(c.id, "new"));
 
   const pickOne = (types: CardType[], slot: Slot) => {
     const doneToday = cards.some((c) => types.includes(c.type) && reviewedToday.has(c.id));
     if (doneToday) return;
     const pool = ordered.filter((c) => types.includes(c.type) && !queued.has(c.id));
-    const unseen = pool.find((c) => !states.has(c.id));
+    // Unseen cards come from the focus; if it has none left, fall back to practising a seen one.
+    const unseen = pool.find((c) => !states.has(c.id) && inFocus(c));
     const soonest = pool
       .filter((c) => states.has(c.id))
       .sort((a, b) => states.get(a.id)!.due.getTime() - states.get(b.id)!.due.getTime())[0];
@@ -82,4 +92,14 @@ export function planToday({
   pickOne(["out-loud"], "out-loud");
 
   return plan;
+}
+
+/** a1 a2 b1 c1 c2 → a1 b1 c1 a2 c2: one from each group in turn, keeping each group's order. */
+function roundRobin<T>(items: T[], key: (item: T) => string): T[] {
+  const groups = new Map<string, T[]>();
+  for (const it of items) groups.set(key(it), [...(groups.get(key(it)) ?? []), it]);
+  const lists = [...groups.values()];
+  const out: T[] = [];
+  for (let i = 0; out.length < items.length; i++) for (const l of lists) if (i < l.length) out.push(l[i]);
+  return out;
 }

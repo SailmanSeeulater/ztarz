@@ -168,7 +168,11 @@ function MissedMost({ report }: { report: WeeklyReport }) {
   if (report.missedMost.length === 0) return null;
   return (
     <section>
-      <SectionHead title="Missed most">Practise these in the library</SectionHead>
+      <SectionHead title="Missed most">
+        <Link href="/drill" className="text-tint hover:opacity-80">
+          Drill what you&apos;ve missed ›
+        </Link>
+      </SectionHead>
       <ul className="mt-3 overflow-hidden rounded-2xl bg-group">
         {report.missedMost.map(({ card, missed }) => {
           const row = (

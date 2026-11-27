@@ -87,3 +87,15 @@ export const note = pgTable(
   },
   (t) => [index().on(t.userId, t.updatedAt)],
 );
+
+/** Study settings, one row per user (absent until they change something). */
+export const userPref = pgTable("user_pref", {
+  userId: text()
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** New cards introduced per day. */
+  newPerDay: integer().notNull().default(5),
+  /** Module ids to draw new cards from; empty means all of them. */
+  focus: jsonb().$type<string[]>().notNull().default([]),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});

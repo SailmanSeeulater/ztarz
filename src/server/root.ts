@@ -1,5 +1,6 @@
 import { labRouter } from "./routers/lab";
 import { noteRouter } from "./routers/note";
+import { prefsRouter } from "./routers/prefs";
 import { reviewRouter } from "./routers/review";
 import { sessionRouter } from "./routers/session";
 import { router } from "./trpc";
@@ -7,6 +8,7 @@ import { router } from "./trpc";
 export const appRouter = router({
   lab: labRouter,
   note: noteRouter,
+  prefs: prefsRouter,
   review: reviewRouter,
   session: sessionRouter,
 });
