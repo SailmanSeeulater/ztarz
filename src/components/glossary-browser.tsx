@@ -60,7 +60,7 @@ export function GlossaryBrowser({
 
   return (
     <div>
-      <div className="sticky top-0 z-10 -mx-4 bg-[var(--bg)]/90 px-4 pt-2 pb-3 backdrop-blur-md">
+      <div className="sticky top-[5.25rem] z-10 -mx-4 sm:top-[3.25rem] bg-[var(--bg)]/90 px-4 pt-2 pb-3 backdrop-blur-md">
         <input
           type="search"
           value={query}
@@ -96,7 +96,7 @@ export function GlossaryBrowser({
             <h2 className="px-1 text-[0.8125rem] font-semibold tracking-wide text-label-2">{letter}</h2>
             <ul className="mt-2 space-y-2.5">
               {ts.map((t) => (
-                <li key={t.id} id={`t-${t.id}`} className="scroll-mt-32 rounded-2xl bg-group px-4 py-3.5">
+                <li key={t.id} id={`t-${t.id}`} className="scroll-mt-52 sm:scroll-mt-44 rounded-2xl bg-group px-4 py-3.5">
                   <div className="flex items-start gap-3">
                     <div className="min-w-0 flex-1">
                       <h3 className="text-[1.0625rem] font-semibold">

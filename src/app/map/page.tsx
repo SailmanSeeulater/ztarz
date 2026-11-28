@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
+import { ProgressTabs } from "@/components/progress-tabs";
 import { PassEmboss } from "@/components/module-art";
 import { Field, ModuleBadge, hueFor, moduleParts } from "@/components/pass";
 import { BRANCH_PREREQS, MODULE_GROUPS, type ModuleId } from "@/lib/content/schema";
@@ -22,8 +23,9 @@ const EMPTY: ModuleProgress = { total: 0, started: 0, mature: 0, due: 0 };
 export default function MapPage() {
   return (
     <div>
-      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Map</h1>
-      <p className="mt-1 max-w-[60ch] text-[0.9375rem] text-label-2">
+      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Progress</h1>
+      <ProgressTabs active="map" />
+      <p className="mt-4 max-w-[60ch] text-[0.9375rem] text-label-2">
         Foundations feed the role branches. A card is mature once it&apos;s scheduled 21+ days out. Tap a pass for
         details.
       </p>

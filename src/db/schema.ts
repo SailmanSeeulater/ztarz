@@ -87,3 +87,53 @@ export const note = pgTable(
   },
   (t) => [index().on(t.userId, t.updatedAt)],
 );
+
+/** Study settings, one row per user (absent until they change something). */
+export const userPref = pgTable("user_pref", {
+  userId: text()
+    .primaryKey()
+    .references(() => user.id, { onDelete: "cascade" }),
+  /** New cards introduced per day. */
+  newPerDay: integer().notNull().default(5),
+  /** Module ids to draw new cards from; empty means all of them. */
+  focus: jsonb().$type<string[]>().notNull().default([]),
+  updatedAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+});
+
+/**
+ * Things you did that no other table records: notes created and deleted, focus changes,
+ * drills and exams finished. Reviews, lab attempts and sign-ins already have their own rows;
+ * the activity log page reads all of them together.
+ */
+export const activity = pgTable(
+  "activity",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: userId(),
+    kind: text().notNull(),
+    summary: text().notNull(),
+    /** Where the entry links to, if anywhere (a same-site path). */
+    href: text(),
+    at: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index().on(t.userId, t.at)],
+);
+
+/** One finished exam. Answers are kept so the result page can be rebuilt from the cards. */
+export const examAttempt = pgTable(
+  "exam_attempt",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: userId(),
+    scope: text().notNull(),
+    scopeLabel: text().notNull(),
+    total: integer().notNull(),
+    correct: integer().notNull(),
+    durationMs: integer().notNull(),
+    limitMs: integer().notNull(),
+    /** In question order; `picked` indexes the card's choices as written, null if left blank. */
+    answers: jsonb().$type<{ cardId: string; picked: number | null }[]>().notNull(),
+    createdAt: timestamp({ withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index().on(t.userId, t.createdAt)],
+);

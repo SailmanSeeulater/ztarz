@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Suspense } from "react";
 import { ChevronRightIcon } from "@/components/icons";
+import { ProgressTabs } from "@/components/progress-tabs";
 import { ModuleArt } from "@/components/module-art";
 import { Field, hueFor, moduleParts } from "@/components/pass";
 import { isPrivate } from "@/lib/content";
@@ -15,14 +16,8 @@ export const metadata: Metadata = { title: "This week" };
 export default function WeekPage() {
   return (
     <div>
-      <Link
-        href="/"
-        className="-ml-1.5 inline-flex items-center gap-0.5 text-[0.9375rem] text-tint hover:opacity-80"
-      >
-        <ChevronRightIcon className="size-5 rotate-180" />
-        Today
-      </Link>
-      <h1 className="mt-2 text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">This week</h1>
+      <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Progress</h1>
+      <ProgressTabs active="week" />
       <Suspense fallback={<div className="pass mt-6 h-64 animate-pulse opacity-60" />}>
         <Report />
       </Suspense>
@@ -168,7 +163,11 @@ function MissedMost({ report }: { report: WeeklyReport }) {
   if (report.missedMost.length === 0) return null;
   return (
     <section>
-      <SectionHead title="Missed most">Practise these in the library</SectionHead>
+      <SectionHead title="Missed most">
+        <Link href="/drill" className="text-tint hover:opacity-80">
+          Drill what you&apos;ve missed ›
+        </Link>
+      </SectionHead>
       <ul className="mt-3 overflow-hidden rounded-2xl bg-group">
         {report.missedMost.map(({ card, missed }) => {
           const row = (

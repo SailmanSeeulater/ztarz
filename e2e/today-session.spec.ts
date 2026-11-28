@@ -98,7 +98,7 @@ test("streak, notes and library navigation", async ({ page }) => {
   await page.locator("#m-f1").click();
   await expect(f1).toHaveAttribute("open");
   await expect(page.locator("details", { has: page.locator("#m-f2") })).not.toHaveAttribute("open");
-  await f1.getByRole("link").first().click();
+  await f1.getByRole("link").nth(1).click(); // the first link is "Drill 10 at random"
   await expect(page.getByText(/^Card 1 of \d+$/)).toBeVisible();
   await page.waitForLoadState("networkidle");
   await page.keyboard.press("ArrowRight");
@@ -110,4 +110,104 @@ test("streak, notes and library navigation", async ({ page }) => {
   await expect(page.getByRole("heading", { name: /^DNS/, level: 3 })).toBeVisible();
   await page.goto("/library/solutions/0001-two-sum");
   await expect(page.getByRole("heading", { name: /Two Sum/, level: 1 })).toBeVisible();
+});
+
+test("focus, drill and search", async ({ page }) => {
+  test.setTimeout(90_000);
+  await signIn(page);
+
+  // Focus: pick Go, and Today shows it.
+  await page.getByRole("link", { name: /^Focus: everything/ }).click();
+  await expect(page.getByRole("heading", { name: "Focus", level: 1 })).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  await page.getByRole("button", { name: /^Go\b/, pressed: false }).click();
+  await expect(page.getByText(/^1 in focus/)).toBeVisible();
+  await expect(page.getByText("Saved")).toBeVisible();
+  await page.getByRole("button", { name: "More new cards" }).click();
+  await expect(page.getByText("Saved")).toBeVisible();
+  await page.goto("/");
+  await expect(page.getByRole("link", { name: /^Focus: Go/ })).toBeVisible();
+
+  // Drill a module to the end; it scores you and offers another round.
+  await page.goto("/drill?m=f2");
+  await page.waitForLoadState("networkidle");
+  const done = page.getByRole("heading", { name: "Drill complete" });
+  // Finishing a drill writes a line to the activity log; wait for it before leaving the page.
+  const logged = page.waitForResponse((r) => r.url().includes("activity.drillFinished") && r.ok());
+  for (let i = 0; i < 10 && !(await done.isVisible()); i++) {
+    await expect(page.getByText(`${i + 1} / 10`)).toBeVisible();
+    const choices = page.locator("ol > li > button");
+    if ((await choices.count()) > 0) {
+      await choices.first().click();
+      await page.getByRole("button", { name: /^(Next|Finish)/ }).click();
+    } else {
+      await page.getByRole("button", { name: "Reveal answer" }).click();
+      await page.getByRole("button", { name: /^Knew it/ }).click();
+    }
+  }
+  await expect(done).toBeVisible();
+  await logged;
+  await expect(page.getByText(/^\d+ of 10$/)).toBeVisible();
+  await expect(page.getByRole("link", { name: "Drill again" })).toBeVisible();
+
+  // The missed-lately drill loads (the first test rated some cards "again", or it says there's nothing).
+  await page.goto("/drill");
+  await expect(page.getByRole("heading", { name: "Missed lately", level: 1 })).toBeVisible();
+
+  // Search finds a glossary term, a card and a solution.
+  await page.goto("/library");
+  await page.waitForLoadState("networkidle");
+  const search = page.getByLabel("Search the library");
+  await search.fill("dns");
+  const results = page.locator("ul").filter({ has: page.getByText("Glossary", { exact: true }) });
+  await expect(results.getByRole("link").first()).toContainText("DNS");
+  await search.fill("two sum");
+  await expect(page.getByRole("link", { name: /1\. Two Sum/ })).toBeVisible();
+  await search.fill("");
+  await expect(page.locator("#m-f1")).toBeVisible();
+});
+
+test("exam, progress and activity log", async ({ page }) => {
+  test.setTimeout(90_000);
+  await signIn(page);
+
+  // Sit a 10-question exam on one module: answer some, leave some blank, hand in.
+  await page.getByRole("link", { name: "Exams" }).click();
+  await page.getByLabel("What on").selectOption("f1");
+  await page.getByRole("button", { name: "Start exam" }).click();
+  await expect(page.getByRole("timer")).toBeVisible();
+  await page.waitForLoadState("networkidle");
+  const total = await page.getByRole("navigation", { name: "Questions" }).getByRole("button").count();
+  expect(total).toBeGreaterThan(2);
+  for (let i = 0; i < total - 1; i++) {
+    await page.locator("ol > li > button").first().click();
+    await page.getByRole("button", { name: "Next", exact: true }).click();
+  }
+  await expect(page.getByText(`${total - 1} of ${total} answered`)).toBeVisible();
+  await page.getByRole("button", { name: "Hand in" }).click();
+  await page.getByRole("button", { name: "Hand in with 1 blank?" }).click();
+
+  // The result is marked on the server and kept.
+  await expect(page).toHaveURL(/\/exams\/[0-9a-f-]{36}$/);
+  await expect(page.getByRole("heading", { level: 1, name: /^\d+%$/ })).toBeVisible();
+  await expect(page.getByText(new RegExp(`^\\d+ of ${total}$`))).toBeVisible();
+  await expect(page.getByText("Left blank")).toBeVisible();
+  await page.getByRole("link", { name: "Exams" }).first().click();
+  await expect(page.getByRole("heading", { name: "Past exams" })).toBeVisible();
+  await expect(page.getByRole("link", { name: /^\d+% How the web works/ })).toBeVisible();
+
+  // Progress: the tracker and analytics reflect today's reviews.
+  await page.getByRole("link", { name: "Progress" }).click();
+  await expect(page.getByRole("img", { name: /^Practice over the last 26 weeks: reviews on 1 days$/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Retention by week" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Coming due" })).toBeVisible();
+
+  // The log has the exam, the drill and focus change from earlier tests, and a study sitting.
+  await page.getByRole("navigation", { name: "Progress" }).getByRole("link", { name: "Log" }).click();
+  await expect(page.getByText(/^Exam on How the web works: \d+ of \d+/)).toBeVisible();
+  await expect(page.getByText(/^Drilled Linux and the shell: knew \d+ of 10$/)).toBeVisible();
+  await expect(page.getByText(/^Focus: Go · 6 new a day$/)).toBeVisible();
+  await expect(page.getByText("Created a note")).toBeVisible();
+  await expect(page.getByText(/^Reviewed \d+ cards/).first()).toBeVisible();
+  await expect(page.getByText("Signed in").first()).toBeVisible();
 });

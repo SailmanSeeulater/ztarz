@@ -15,6 +15,20 @@
       "when": 1795609285617,
       "tag": "0001_notes",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1795819814711,
+      "tag": "0002_user_pref",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1795820139140,
+      "tag": "0003_activity_exams",
+      "breakpoints": true
     }
   ]
 }

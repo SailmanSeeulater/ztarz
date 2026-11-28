@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { cardsByModule, publicCards } from "@/lib/content";
+import { allGlossary, allSolutions, cardsByModule, publicCards } from "@/lib/content";
+import { GLOSSARY_CATEGORIES } from "@/lib/content/schema";
+import { LibrarySearch } from "@/components/library-search";
+import type { SearchItem } from "@/lib/search";
 import { MODULE_GROUPS, type ModuleId } from "@/lib/content/schema";
 import type { Card } from "@/lib/content";
 import { ChevronRightIcon } from "@/components/icons";
@@ -15,10 +18,34 @@ export const metadata: Metadata = { title: "Library" };
 
 export default function Library() {
   const byModule = new Map(cardsByModule());
+  const index: SearchItem[] = [
+    ...allGlossary().map((t) => ({
+      kind: "term" as const,
+      href: `/library/glossary#t-${t.id}`,
+      title: t.term,
+      context: t.aka ?? GLOSSARY_CATEGORIES[t.category],
+      extra: GLOSSARY_CATEGORIES[t.category],
+    })),
+    ...publicCards().map((c) => ({
+      kind: "card" as const,
+      href: `/cards/${c.id}`,
+      title: c.title,
+      context: moduleParts(c.module).name,
+      extra: [...c.tags, ...c.stack.map((l) => l.title)].join(" "),
+    })),
+    ...allSolutions().map((sol) => ({
+      kind: "solution" as const,
+      href: `/library/solutions/${sol.id}`,
+      title: `${sol.number}. ${sol.title}`,
+      context: sol.patterns.join(" · "),
+      extra: `leetcode ${sol.difficulty} ${sol.structures.join(" ")}`,
+    })),
+  ];
   return (
     <div>
       <h1 className="text-[2.125rem] leading-tight font-bold tracking-[-0.02em]">Library</h1>
       <LibraryTabs active="cards" />
+      <LibrarySearch items={index}>
       <p className="mt-4 max-w-[60ch] text-[0.9375rem] text-label-2">
         {publicCards().length} cards. Tap a module to open it. Practising here doesn&apos;t change a card&apos;s
         schedule; your daily session does that.
@@ -43,6 +70,7 @@ export default function Library() {
           );
         })}
       </div>
+      </LibrarySearch>
     </div>
   );
 }
@@ -67,6 +95,16 @@ function ModuleSection({ id, cards }: { id: ModuleId; cards: Card[] }) {
         <ChevronRightIcon className="size-4 shrink-0 text-label-2 transition-transform duration-200 group-open/mod:rotate-90" />
       </summary>
       <ul className="border-t border-sep bg-group-2/40">
+        <li>
+          <Link
+            href={`/drill?m=${id}`}
+            prefetch={false}
+            className="flex items-center gap-3 border-b border-sep py-2.5 pr-3 pl-[4.25rem] text-[0.9375rem] font-medium text-tint transition-colors hover:bg-group-2"
+          >
+            <span className="flex-1">Drill {Math.min(10, cards.length)} at random</span>
+            <ChevronRightIcon className="size-4 shrink-0" />
+          </Link>
+        </li>
         {cards.map((card) => (
           <li key={card.id} className="group/row">
             <Link

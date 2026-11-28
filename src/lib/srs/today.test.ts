@@ -95,4 +95,43 @@ describe("planToday", () => {
     });
     expect(plan).toEqual([]);
   });
+
+  it("draws new cards only from the focus, taking turns between its modules", () => {
+    const pool = [
+      card("f1/a", "concept", "f1"),
+      card("f1/b", "concept", "f1"),
+      card("f6/a", "mcq", "f6"),
+      card("f6/b", "mcq", "f6"),
+      card("go/a", "concept", "go"),
+      card("go/prints", "what-prints", "go"),
+      card("f1/prints", "what-prints", "f1"),
+    ];
+    const plan = planToday({ cards: pool, states: new Map(), now, introducedToday: 0, newPerDay: 3, focus: new Set(["f6", "go"]) });
+    expect(plan).toEqual([
+      { cardId: "f6/a", slot: "new" },
+      { cardId: "go/a", slot: "new" },
+      { cardId: "f6/b", slot: "new" },
+      { cardId: "go/prints", slot: "drill" }, // the drill pick follows the focus too
+    ]);
+  });
+
+  it("still brings back due reviews from outside the focus", () => {
+    const plan = planToday({
+      cards,
+      states: new Map([["frontend/a-concept", { due: ago(1) }]]),
+      now,
+      introducedToday: 0,
+      newPerDay: 1,
+      focus: new Set(["f1"]),
+    });
+    expect(plan.slice(0, 2)).toEqual([
+      { cardId: "frontend/a-concept", slot: "review" },
+      { cardId: "f1/dns", slot: "new" },
+    ]);
+  });
+
+  it("treats an empty focus as everything", () => {
+    const plan = planToday({ cards, states: new Map(), now, introducedToday: 0, newPerDay: 1, focus: new Set() });
+    expect(plan[0]).toEqual({ cardId: "f1/dns", slot: "new" });
+  });
 });

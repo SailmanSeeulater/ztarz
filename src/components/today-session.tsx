@@ -113,11 +113,19 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
   if (queue.length === 0) {
     return (
       <EndPass title="All caught up">
-        Nothing is due and there are no new cards left today. Browse the{" "}
+        Nothing is due and there are no new cards left today. Want more?{" "}
+        <Link href="/drill" className="underline underline-offset-2">
+          Drill what you&apos;ve missed lately
+        </Link>
+        , pick a module to drill in the{" "}
         <Link href="/library" className="underline underline-offset-2">
           library
         </Link>
-        , or write a few cards.
+        , or raise your daily new cards in{" "}
+        <Link href="/focus" className="underline underline-offset-2">
+          Focus
+        </Link>
+        .
       </EndPass>
     );
   }
@@ -136,7 +144,11 @@ export function TodaySession({ items, seed }: { items: Session["items"]; seed: n
         }
         barcode={stats.results}
       >
-        See you tomorrow.
+        See you tomorrow. Still warm?{" "}
+        <Link href="/drill" className="underline underline-offset-2">
+          Drill what you&apos;ve missed lately
+        </Link>
+        .
       </EndPass>
     );
   }
